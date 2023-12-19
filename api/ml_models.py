@@ -24,7 +24,7 @@ def check_dif(X, y):
     """
 
 """
-tr_X 是一个矩阵, tr_y 是一个 0-7 的数字, 表示标签
+tr_X 是一个矩阵, tr_y 是一个 0-8 的数字, 表示标签
 """
 
 def pca_method(tr_X, te_X):
