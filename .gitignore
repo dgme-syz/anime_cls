@@ -32,9 +32,5 @@ DANBOORU
 *.png
 *.jpg
 *.jpeg
-<<<<<<< HEAD
-.idea
-=======
 .idea
 *.xml
->>>>>>> a61a36020a9d0b05d7f78526f471fe66d3e2c0b9
