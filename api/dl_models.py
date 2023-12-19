@@ -1,5 +1,7 @@
 import torch.nn as nn
-import torch, tqdm, os, pathlib
+from tqdm import tqdm
+import numpy as np
+import torch, os, pathlib
 import torch.nn.functional as F
 
 save_dir = os.path.join(pathlib.Path(__file__).parent.absolute().__str__(), "Trained")
@@ -7,10 +9,10 @@ save_dir = os.path.join(pathlib.Path(__file__).parent.absolute().__str__(), "Tra
 class confusion_matrix:
     def __init__(self, cls) -> None:
         self.cls = cls
-        self.mat = [[] for _ in range(cls)]
+        self.mat = np.zeros((cls, cls))
     def upd(self, y, y_hat):
         for row, col in zip(y, y_hat):
-            self.mat[row, col] += 1
+            self.mat[row][col] += 1
     def acc(self):
         tot, cor = 0, 0
         for i in range(self.cls):
@@ -24,13 +26,15 @@ class confusion_matrix:
 class Net(nn.Module):
     def __init__(self, w = 64, decompose=100):
         super(Net, self).__init__()
+        self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, decompose)
         self.dense2 = torch.nn.Linear(decompose, 9)
     def forward(self, x):
-        x = torch.flatten(x)
+        x = self.f(x) #
         x = self.dense2(F.tanh(self.dense1(x)))
+        return x
 
-def train_epoch(net, train_iter, loss, updater):
+def train_epoch(net, train_iter, loss, updater, device):
     net.train()
     total_loss = 0
     num_batches = len(train_iter)
@@ -38,6 +42,8 @@ def train_epoch(net, train_iter, loss, updater):
     co_mat = confusion_matrix(9)
     with tqdm(total=num_batches, desc='Epoch') as pbar:
         for i, (X, y) in enumerate(train_iter):
+            X = X.to(device)
+            y = y.to(device)
             y_hat = net(X)
             l = loss(y_hat, y)
             updater.zero_grad()
@@ -50,19 +56,22 @@ def train_epoch(net, train_iter, loss, updater):
             preds = torch.argmax(y_hat, dim=1)
             co_mat.upd(y, preds)
             ###
-    print(f"acc:{co_mat.acc:.6f}")
+    print(f"acc:{co_mat.acc():.6f}")
 
-def evaluate_model(net, data_iter, loss):
+def evaluate_model(net, data_iter, loss, device):
     net.eval()
     co_mat = confusion_matrix(9)
     with torch.no_grad():
         for X, y in data_iter:
+            X = X.to(device)
+            y = y.to(device)
             y_hat = net(X)
             l = loss(y_hat, y)# CrossEntropy 输入 logits,labels
             preds = torch.argmax(y_hat, dim=1)
             ## add metrics
             co_mat.upd(y, preds)
             ##
+    print(f"acc:{co_mat.acc():.6f}")
     return co_mat
 
 def save_model(net, epoch, acc):
@@ -71,12 +80,12 @@ def save_model(net, epoch, acc):
         os.makedirs(save_dir)
     torch.save(net.state_dict(), os.path.join(save_dir, f"epoch_{epoch}_acc_{acc:.6f}.pt"))
 
-def train(net, train_iter, test_iter, loss, num_epochs, updater):
+def train(net, train_iter, test_iter, loss, num_epochs, updater, device):
     for epoch in range(num_epochs):
-        train_epoch(net, train_iter, loss, updater)
-        mat = evaluate_model(net, test_iter, loss)
+        train_epoch(net, train_iter, loss, updater, device)
+        mat = evaluate_model(net, test_iter, loss, device)
         if (epoch + 1) % 5 == 0:
-            save_model(net, epoch + 1, mat.acc)
+            save_model(net, epoch + 1, mat.acc())
 
 if __name__ == '__main__':
     model = Net()
