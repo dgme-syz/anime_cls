@@ -37,7 +37,7 @@ def pca_method(tr_X, te_X):
 def ker_pca_method(tr_X, te_X):
     """
     输入: 训练集的特征 tr_X, 测试集的特征 te_X
-    输出: 使用 rbf核pca 对于 tr_X 做降维(自行选择一个降维的合适维度) 
+    输出: 使用 tanh核pca 对于 tr_X 做降维(自行选择一个降维的合适维度) 
           然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
     """
 
@@ -65,6 +65,6 @@ def knn_method(tr_X, tr_y, te_X, te_y):
     """
 def svm_method(tr_X, tr_y, te_X, te_y):
     """
-    输入: 训练集 (tr_X, tr_y), 使用 rbf 核 svm 训练
+    输入: 训练集 (tr_X, tr_y), 使用 tanh 核 svm 训练
     输出: 测试集上的 acc,以及整体的混淆矩阵,需要可视化
     """
