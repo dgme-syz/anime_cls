@@ -32,3 +32,5 @@ DANBOORU
 *.png
 *.jpg
 *.jpeg
+.idea
+*.xml
