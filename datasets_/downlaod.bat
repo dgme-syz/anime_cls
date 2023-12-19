@@ -1,0 +1,3 @@
+curl -o data.zip  https://public.sn.files.1drv.com/y4mXyEJJmq78D4yqrSLvxrxI6cJ4d-iGVuMwb652VtDnccxSoi6Lqw4-jINOG_K-UAmkyHdKyqKuIOkDsDEUjtkGScpOPHOiGZLvpiICvOssppc9HTNGYU4i3oA_59lbeFoq-tjLcFqxeodm8IbN2mZfm60AyNK97OXNoegN7wSw41N3FnBAE31oC72nDWM8xrfh_e8URPxzdvnsksdQzU81ztpL0ZJLowAx1EPT7lUfpA
+
+unzip -d  ./data data.zip
