@@ -3,6 +3,7 @@ from tqdm import tqdm
 import numpy as np
 import torch, os, pathlib
 import torch.nn.functional as F
+from sklearn.decomposition import KernelPCA
 
 save_dir = os.path.join(pathlib.Path(__file__).parent.absolute().__str__(), "Trained")
 
@@ -24,7 +25,7 @@ class confusion_matrix:
     
 # 两层隐层神经元
 class Net(nn.Module):
-    def __init__(self, w = 64, decompose=100):
+    def __init__(self, w = 64, decompose=100, cls=9):
         super(Net, self).__init__()
         self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, decompose)
@@ -34,6 +35,18 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.f(x) #
         x = self.bn2(self.dense2(self.bn1(F.relu(self.dense1(x)))))
+        return x
+
+class KNet(nn.Module):
+    def __init__(self, w=64, decompose=100, cls=9) -> None:
+        super(KNet, self).__init__()
+        self.f = torch.nn.Flatten() #
+        self.dense1 = torch.nn.Linear(w * w * 3, 256)
+        self.dense2 = torch.nn.Linear(256, decompose)
+        self.dense3 = nn.Linear(decompose, cls)
+    def forward(self, x):
+        x = self.f(x) #
+        x = self.dense3(self.dense2(F.relu(self.dense1(x))))
         return x
 
 # 定义基本的残差块
