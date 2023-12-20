@@ -21,8 +21,8 @@ def dl():
     train_data = DatasetFromFolder(os.path.join(data_dir, "ANIME"), names)
     test_data = DatasetFromFolder(os.path.join(data_dir, "DANBOORU"), names)
 
-    train_iter = DataLoader(train_data, batch_size=32, shuffle=True)
-    test_iter = DataLoader(test_data, batch_size=32, shuffle=False)
+    train_iter = DataLoader(train_data, batch_size=256, shuffle=True)
+    test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
     net = ResNet18(9).to(device)
@@ -46,8 +46,8 @@ def ml():
     ###
 
 if __name__ == '__main__':
-    dl()
-    # ml()
+    # dl()
+    ml()
 
 
 
