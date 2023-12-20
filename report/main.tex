@@ -64,7 +64,7 @@
 % Cambiar sólo el título en español y en inglés, el resto de datos lo llenarán los encargados de la revista una vez que se apruebe el artículo
 % Orden: T\'itulo en espanol - T\'itulo en ingl\'es - volumen - n\'umero - mes de inicio - mes final - anno
 \definecolor{purple1}{HTML}{7F3CFF}
-\titulo{\textcolor{purple1}{ 基于 GochiUsa\_Faces数据集分类问题的解决方案}}{}{num}{num}{mes, año}{mes, año}
+\titulo{\textcolor{azulTitulos}{ 基于 GochiUsa\_Faces数据集分类问题的解决方案}}{}{num}{num}{mes, año}{mes, año}
 
 % Autores del artículo, se permite hasta ocho autores, si son más entonces solicitar una plantilla especial con la cantidad necesaria
 % Para cada autor se debe indicar cinco datos:
@@ -93,7 +93,7 @@
 
 
 \begin{keywords}
-	\textcolor{purple1}{图像分类\ 降维 \ 判别 \ 多因变变量线性回归 \ 假设检验}
+	\textcolor{azulTitulos}{图像分类\ 降维 \ 判别 \ 多因变变量线性回归 \ 假设检验}
 \end{keywords}
 
 \section{介绍}
@@ -109,20 +109,18 @@
 首先我们小组成员自行充当分类器，分类效果非常好，因此这个学习问题是理论上可以实现。下面我将阐述这份实验提供的解决方案：
 
 \begin{nota}
-	
-1. 首先观察图片数据的特征是否近似满足正态分布，以及初步构建对于数据认识。
 
-2. 然后基于先验，选择合适的方法进行降维，并将降至二维进行可视化。
-
-3. 对于不同的降维结果，使用基于模型的多因变量的线性回归，SVM，以及 model-free 的基于决策树的分类器进行测试，挑选出最好的结果。
-
-4. 基于以上结果进行分析。
-
+\begin{itemize}
+	\item 首先观察图片数据的特征是否近似满足正态分布，以及初步构建对于数据认识。
+	\item 然后基于先验，选择合适的方法进行降维，并将降至二维进行可视化。
+	\item 对于不同的降维结果，使用基于模型的多因变量的线性回归，SVM，以及 model-free 的基于决策树的分类器进行测试，挑选出最好的结果。
+	\item 基于以上结果进行分析。
+\end{itemize}
 \end{nota}
 
 \subsection{符号约定}
 
-为了便于叙述，这里规定 $N$ 为数据集样本数，$M$ 为每个样本的特征，这里定义每个样本的特征为图片张量向量化的结果，$X$ 为 $N \times M$ 的数据矩阵，$Y$ 为 $N \times 1$ 的标签向量，其中 $y_i \in Z \mbox{ and } y_i \in [0,8]$，约定每一个样本为 $X_i^\top = \begin{bmatrix}x_{i1} & \cdots & x_{iM}\end{bmatrix}$，对应标签为 $y_i$，从而有：
+为了便于叙述，这里规定 $N$ 为数据集样本数，$M$ 为每个样本的特征，这里定义每个样本的特征为图片张量向量化的结果，$X$ 为 $N \times M$ 的数据矩阵，$Y$ 为 $N \times 1$ 的标签向量，其中 $y_i \in Z \mbox{ and } y_i \in [0,8]$，约定每一个样本为 $X_i^\top = \begin{bmatrix}x_{i1} & \cdots & x_{iM}\end{bmatrix}$，对应标签为 $y_i$，$Y = \begin{bmatrix}y_1&y_2& \cdots & y_N \end{bmatrix}^\top$从而有：
 
 \begin{align}
 	X = \begin{bmatrix}
@@ -131,14 +129,30 @@
 	x_{11} & x_{12} & \cdots & x_{1M}\\
 	x_{21} & x_{22} & \cdots & x_{2M} \\
 	\vdots & & &\vdots\\
-	x_{N1} & x_{N2} & \cdots & x_{NM}
-	\end{bmatrix}\quad\quad Y = \begin{bmatrix}
-	y_1\\y_2\\ \vdots \\ y_N \notag
-	\end{bmatrix}
+	x_{N1} & x_{N2} & \cdots & x_{NM}\notag
+	\end{bmatrix} 
 \end{align}
 
 
-\section{}
+\section{数据属性}
+
+在对数据进行进一步分析，为了尽可能防止出现数值问题(0-255以内的数字多次线性组合可能会是很大的值)，首先先将数据通过标准化处理调整为均值为0，方差为1，设 $\bar{x}_i$ 为数据矩阵 $X$ 第 $i$ 列的样本均值(也就是随机变量 $X_i$ 的$N$ 次取样)，$\sigma_i$ 为其标准差，于是其内的数据 $x$ 的标准化后的值$\tilde{x}$为:
+
+$$
+\tilde{x} = \frac{x - \bar{x}_i}{\sigma_i}
+$$
+
+\subsection{类别情况}
+
+首先观察最直观的数据属性，将每个类别在训练集和测试集上的规模画出(见 Figure 1)，训练集内最少的两个类别为 Mocha 与 Blue Mountain 分别有 1241个，1607个，而数量最多的类别 Chino 有 12941 个，倍数达到十倍，该数据集为长尾数据集，原数据集作者说，但是由于大部分角色具有明显的特征，因此我们仍然选择这两个类别作为我们分类任务的一环(本质上还是因为这个学习问题不太难)
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.13]{./images/pic1}
+	\caption{各类别训练集与测试集的分类情况，横轴采用对数刻度}
+\end{figure}
+
+
 
 \subsection{Subsección}
 

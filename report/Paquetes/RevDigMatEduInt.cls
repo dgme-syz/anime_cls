@@ -4,7 +4,7 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 
-\LoadClass[a4paper, 11pt, twoside]{article}
+\LoadClass[a4paper, 11pt, twoside, twocolumn]{article}
 
 %\RequirePackage[utf8]{inputenc}
 
@@ -108,7 +108,7 @@
 		{\textcolor{lightgray}{\rule[0.5cm]{0.8\textwidth}{0.1pt}}} \\[-0.2cm]
 		\begin{minipage}{0.6\textwidth}
 			\begin{center}
-			\fhv{12}{\textcolor[HTML]{7F3CFF}{\today} }  \\[0.04cm]
+			\fhv{12}{\textcolor{azulTitulos}{\today} }  \\[0.04cm]
 			\end{center}
 			{\textcolor{lightgray}{\rule[0.5cm]{\textwidth}{0.1pt}}}
 		\end{minipage}
@@ -383,10 +383,10 @@
 	\end{minipage}
 	\begin{minipage}{0.45\textwidth}
 		\vspace{10pt}
-		\fhvb{10}{\textcolor[HTML]{7F3CFF}{Pro.多元统计分析}}\\[-0.3cm]
-		\fhvb{10}{\textcolor[HTML]{7F3CFF}{指导教师:李野}}\\[-0.3cm]
-		\fntg[phv][9]{\bfseries\textcolor[HTML]{7F3CFF}{仓库地址:}
-		\href{https://github.com/DGMEFG/anime_cls}{\textcolor[HTML]{7F3CFF}{https://github.com/DGMEFG/anime\_cls}}}\\[-0.3cm]
+		\fhvb{10}{\textcolor{azulTitulos}{Pro.多元统计分析}}\\[-0.3cm]
+		\fhvb{10}{\textcolor{azulTitulos}{指导教师:李野}}\\[-0.3cm]
+		\fntg[phv][9]{\bfseries\textcolor{azulTitulos}{仓库地址:}
+		\href{https://github.com/DGMEFG/anime_cls}{\textcolor{azulTitulos}{https://github.com/DGMEFG/anime\_cls}}}\\[-0.3cm]
 	\end{minipage}
 	\textcolor{lightgray}{\rule[0.5cm]{\textwidth}{0.1pt}}
 }
