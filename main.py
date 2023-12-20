@@ -4,7 +4,7 @@ from torch.optim import Adam
 from pathlib import Path
 from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
-from api.dl_models import Net, train
+from api.dl_models import Net, train, ResNet18
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     test_iter = DataLoader(test_data, batch_size=32, shuffle=False)
 
     # 2. load 模型
-    net = Net().to(device)
+    net = ResNet18(9).to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
