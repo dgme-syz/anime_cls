@@ -25,7 +25,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=32, shuffle=False)
 
     # 2. load 模型
-    net = Net().to(device)
+    net = ResNet18(9).to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -46,8 +46,8 @@ def ml():
     ###
 
 if __name__ == '__main__':
-    # dl()
-    ml()
+    dl()
+    # ml()
 
 
 
