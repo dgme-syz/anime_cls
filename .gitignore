@@ -26,7 +26,7 @@ TestResults.xml
 *.pt
 *.csv
 *.zip
-*.pdf
+..GochiUsa_Dataset.pdf
 ANIME
 DANBOORU
 *.png
@@ -34,3 +34,8 @@ DANBOORU
 *.jpeg
 .idea
 *.xml
+*.synctex.gz
+*.out
+*.log
+*.aux
+svg-inkscape

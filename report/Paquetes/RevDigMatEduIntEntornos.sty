@@ -1,0 +1,484 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{Paquetes/RevDigMatEduIntEntornos}[2020/10/02 Custom Package]
+
+\RequirePackage{xcolor} 
+\RequirePackage{xparse}					% \NewDocumentEnvironment
+\RequirePackage{tcolorbox} 
+\tcbuselibrary{skins,breakable}     % Librerías de tcolorbox
+
+%Color para los t\'itulos de las secciones y subsecciones
+\definecolor{azulEntornos}{rgb}{.0,.0,.6}
+\definecolor{amarilloEntornos}{RGB}{248,248,245} 
+\definecolor{verdeEntornos}{RGB}{0,100,0}
+\definecolor{amarilloCaja}{RGB}{251,237,121}
+
+%---------------------------------------------------------------------------------
+%  Entornos:  Ejemplo, teorema, proposici\'on, lema, lista de ejercicios, 
+%             caja interludio, caja simple  
+%---------------------------------------------------------------------------------
+
+%  Cajas con el paquete  tcbcolor
+%  CONTADORES: ejemplo, definicion, lema, teorema, corolario, proposicion,ejercicio 
+\newcounter{tcbteo}
+\renewcommand{\thetcbteo}{\arabic{tcbteo}}
+
+\newcounter{tcbdefi}
+\renewcommand{\thetcbdefi}{\arabic{tcbdefi}}
+
+\newcounter{tcblema}
+\renewcommand{\thetcblema}{\arabic{tcblema}}
+
+\newcounter{tcbcoro}
+\renewcommand{\thetcbcoro}{\arabic{tcbcoro}}
+
+\newcounter{tcbejem}
+\renewcommand{\thetcbejem}{\arabic{tcbejem}}
+
+\newcounter{tcbListaEjercicios}
+\renewcommand{\thetcbListaEjercicios}{\arabic{tcbListaEjercicios}}
+
+\newcounter{tcbpropo}
+\renewcommand{\thetcbpropo}{\arabic{tcbpropo}}
+
+\newcounter{tcbvoca}
+\renewcommand{\thetcbvoca}{\arabic{tcbvoca}}
+
+\newcounter{tcbnotacion}
+\renewcommand{\thetcbnotacion}{\arabic{tcbnotacion}}
+
+\newcounter{tcbalgoritmo}
+\renewcommand{\thetcbalgoritmo}{\arabic{tcbalgoritmo}}
+
+\newcounter{tcbobservacion}
+\renewcommand{\thetcbobservacion}{\arabic{tcbobservacion}}
+
+\newlength{\examlen}
+\tikzset{
+	wnodeTeorema/.style={%
+		rectangle,  top color=gray!5, bottom color=gray!5,
+		inner sep=1mm,anchor=west,font=\small\bf\sffamily},
+	wnodeminimo/.style={%
+		rectangle,  top color=white, bottom color=white,
+		text=azulEntornos,inner sep=1mm,anchor=west,font=\small\bf\sffamily}      
+}
+
+
+
+% Teorema -----------------------------------------------------
+%\begin{teorema}  o \begin{teorema}[de tal] o \begin{teorema}[][ref]
+\newtcolorbox{wwteorema}[3][]{
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,top=7mm,
+	fontupper=\normalsize, step and label={tcbteo}{#3},
+	overlay unbroken = {
+		%l\'inea delgada
+		\draw[color=gray,  line width=0.2pt] (frame.north west)--([xshift=0pt]frame.north east);
+		\draw[color=gray,  line width=0.2pt] (frame.south west)--([xshift=0pt]frame.south east);
+		%Caja de T***tulo: teo --
+		\node[wnodeTeorema](tituloteo) at ([xshift=0pt, yshift=-4mm]frame.north west)
+		{\textbf{\color{azulTitulos} Teorema \thetcbteo \;#2}};
+		%Borde superior --
+		\draw[gray, line width=2.5cm] ([xshift=1.25cm, yshift=0cm]frame.north west)-- +(\examlen,3pt);
+		%barra inferior
+		\fill[fill=azulEntornos]  (15.8cm,0.2cm) rectangle(17 cm,-0.0cm);
+	},
+	overlay first = {
+		\draw[color=gray,  line width=0.2pt] (frame.north west)--([xshift=0pt]frame.north east);
+		%Caja de T***tulo: teo --
+		\node[wnodeTeorema](tituloteo) at ([xshift=0pt, yshift=-4mm]frame.north west)
+		{\textbf{\color{azulTitulos} Teorema \thetcbteo \;#2}};
+		%Borde superior --
+		\draw[gray, line width=2.5cm] ([xshift=1.25cm, yshift=0cm]frame.north west)-- +(\examlen,3pt);
+	},%
+	% Mantener borde en cambio de p***gina 
+	overlay last = {
+		\draw[color=gray,  line width=0.2pt] (frame.south west)--([xshift=0pt]frame.south east);
+		%barra inferior
+		\fill[fill=azulEntornos]  (15.8cm,0.2cm) rectangle(17 cm,-0.0cm);
+	}
+	#1
+}
+\NewDocumentEnvironment{teorema}{O{} O{} O{}}{\smallskip\begin{wwteorema}{#1}{#2}#3}{\end{wwteorema}\smallskip }
+% FIN de teorema ---------------------------------------------------------
+
+
+% Proposici***n -----------------------------------------------------
+%\begin{proposicion}  o \begin{proposicion}[de tal] o \begin{proposicion}[][ref]
+\newtcolorbox{wwpropo}[3][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,top=7mm,
+	fontupper=\normalsize,step and label={tcbpropo}{#3},
+	overlay unbroken = {
+		\draw[color=gray,  line width=0.2pt] (frame.north west)--([xshift=0pt]frame.north east);
+		%Caja de T***tulo: propo --
+		\node[wnodeTeorema](tituloteo) at ([xshift=0pt, yshift=-4mm]frame.north west)
+		{\textbf{\color{azulTitulos}  Proposici\'on \thetcbpropo\;#2}};
+		%Borde superior --
+		\draw[gray, line width=2.5cm] ([xshift=1.25cm, yshift=0cm]frame.north west)-- +(\examlen,3pt);
+	}, %
+	overlay first ={
+		\draw[color=gray,  line width=0.2pt] (frame.north west)--([xshift=0pt]frame.north east);
+		%Caja de T***tulo: propo --
+		\node[wnodeTeorema](tituloteo) at ([xshift=0pt, yshift=-4mm]frame.north west)
+		{\textbf{\color{azulTitulos}  Proposici\'on \thetcbpropo\;#2}};
+		%Borde superior --
+		\draw[gray, line width=2.5cm] ([xshift=1.25cm, yshift=0cm]frame.north west)-- +(\examlen,3pt);
+	}, %
+	% Mantener borde en cambio de p***gina 
+	overlay last = {
+		\draw[color=gray,  line width=0.2pt] (frame.south west)--([xshift=0pt]frame.south east);
+	}
+	#1
+}
+\NewDocumentEnvironment{proposicion}{O{} O{} O{}}{\smallskip\begin{wwpropo}{#1}{#2} #3}{\end{wwpropo}\smallskip }
+% FIN de proposici\'on---------------------------------------------------------
+
+
+% LEMA -----------------------------------------------------------
+\newtcolorbox{wwlema}[3][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,
+	top=1mm, left=3pt,
+	step and label={tcblema}{#3},
+	fontupper={
+		\small\bf\sffamily {\color{verdeEntornos}Lema \thetcblema \;#2}
+	}~\normalfont, %"Lema..."+texto del cuerpo
+	overlay unbroken  = {
+		%barra vertical
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);              
+	},%
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);              
+	},%
+	% Mantener borde en cambio de p***gina     
+	overlay last ={
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);
+	}
+	#1
+}
+\NewDocumentEnvironment{lema}{O{} O{} O{}}{\smallskip\begin{wwlema}{#1}{#2} #3}{\end{wwlema}\smallskip }
+% FIN de lema--------------------------------------------------------------
+
+
+% % Corolario -------------------------------------------------------
+\newtcolorbox{wwcoro}[2][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,
+	top=1mm,left=3pt,
+	fontupper={
+		\small\bf\sffamily {\color{azulEntornos}Corolario \thetcbcoro}\;
+	}~\normalfont, 
+	step and label={tcbcoro}{#2},
+	overlay unbroken  = {
+		%barra vertical
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);                
+	},%
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);                
+	},%
+	% Mantener borde en cambio de p***gina     
+	overlay last = {
+		\draw[color=gray,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);
+	}
+	#1
+}
+\NewDocumentEnvironment{corolario}{O{} O{}}{\smallskip\begin{wwcoro}{#1} #2}{\end{wwcoro}\smallskip }
+% FIN de corolario------------------------------------------------------
+
+
+% Definici***n---------------------------------------------------------
+\newtcolorbox{wwdefinicion}[3][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,
+	top=6mm,fontupper=\normalsize,step and label={tcbdefi}{#3},
+	overlay unbroken  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Definici\'on \thetcbdefi \;#2}};
+	}, %overlay
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Definici\'on \thetcbdefi \;#2}};
+	}, %overlay
+	% Mantener borde en cambio de p***gina
+	overlay last    = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);
+	}
+	#1
+}
+\NewDocumentEnvironment{definicion}{O{} O{} O{}}{\bigskip\begin{wwdefinicion}{#1}{#2} #3}{\end{wwdefinicion}\bigskip }
+% FIN de definicion---------------------------------------------------------
+
+% Caja para Ejemplo --------------------------------------------------
+% Ejemplo
+\newtcolorbox{wwejemplo}[3][]{%
+	arc=0mm,
+	breakable,drop fuzzy shadow,
+	enhanced,
+	colback=amarilloEntornos,
+	boxrule=0pt,
+	top=8mm, %Separaci***n vertical - inicia texto
+	enlarge top by=\baselineskip/2+1mm,
+	enlarge top at break by=0mm,pad at break=2mm,
+	fontupper=\normalsize,
+	step and label={tcbejem}{#3},
+	overlay unbroken = {%
+		%barra vertical
+		\draw[color=gray!5,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west); 
+		%barra inferior
+		\fill[fill=azulEntornos] (15.8cm,0.2cm) rectangle(17 cm,-0.0cm);          
+		% Caja de imagen Ejemplo
+		%\node[rectangle, 
+		%         text=black, ,fill=ALamarillo!20,
+		%         inner sep=1mm,anchor=west,font=\small\bf\sffamily] at ([xshift=-10.3pt,yshift=-3.2mm]frame.north west)%
+		%{ };
+		% Caja numeraci***n y descripci***n
+		\node[rectangle, %opacity=.3,
+		text=black, drop shadow={opacity=.3, shadow xshift=0.1cm},
+		inner sep=1.5mm,fill=azulEntornos,
+		anchor=west,
+		font=\normalsize] at ([xshift=0cm,yshift=-3.mm]frame.north west)%
+		{\fhvb{10}{\color{white}\;\,Ejemplo \;\thetcbejem \;\;\;#2}};
+	}, 
+	% fin overlay
+	overlay first  = {%
+		% Caja numeraci***n y descripci***n
+		\node[rectangle, %opacity=.3,
+		text=black, drop shadow={opacity=.3, shadow xshift=0.1cm},
+		inner sep=1.5mm,fill=azulEntornos,
+		anchor=west,
+		font=\normalsize] at ([xshift=0cm,yshift=-3.mm]frame.north west)%
+		{\fhvb{10}{\color{white}\;\,Ejemplo \;\thetcbejem \;\;\;#2}};
+	}, 
+	% overlay
+	%Borde cambio de p***ginas
+	overlay middle={\draw[color=amarilloEntornos,line width=3pt] ([xshift=3pt] frame.north west)--([xshift=2pt] frame.south west);
+	},
+	overlay last={\draw[color=amarilloEntornos,line width=3pt] ([xshift=3pt] frame.north west)--([xshift=2pt] frame.south west);
+		%barra inferior
+		\fill[fill=azulEntornos] (15.8cm,0.2cm) rectangle(17 cm,-0.0cm);  }
+	#1}
+%-
+\NewDocumentEnvironment{ejemplo}{O{} O{} O{}}{\smallskip\begin{wwejemplo}{#1}{#2}%
+		#3}{\end{wwejemplo}\smallskip }
+%EJEMPLO-----------------------------------------------------------------
+
+
+% CAJA (interludio, comentario...)---------------------------------------
+\newtcolorbox{wwcaja}[2][]{%
+	arc=0mm,breakable,
+	enhanced,colback=gray!4,
+	boxrule=0pt,
+	top=3mm,
+	enlarge top by=\baselineskip/2+1mm,
+	enlarge top at break by=0mm,pad at break=2mm,
+	fontupper=\normalsize,
+	%Borde
+	overlay unbroken={\draw[color=gray!40,line width=0.2pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+		\node[ rectangle, 
+		top color=azulEntornos!8, bottom color=azulEntornos!8,
+		inner sep=0.5mm,anchor=west,font=\normalsize]at ([xshift=-0.5pt,  yshift=2.30mm]frame.north west){\fhvb{10}{  #2}};
+	},
+	overlay first={\draw[color=gray!2,line width=0.2pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+		\node[ rectangle,
+		top color=azulEntornos!8, bottom color=azulEntornos!8,
+		inner sep=0.5mm,anchor=west,font=\normalsize]at ([xshift=-0.5pt,  yshift=2.30mm]frame.north west){\fhvb{10}{ \bf #2}};
+	},
+	overlay last={\draw[color=gray!2,line width=0.2pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);}
+	#1}
+\NewDocumentEnvironment{caja}{O{} O{}}{\smallskip\begin{wwcaja}{#1}%
+		#2}{\end{wwcaja}\smallskip }
+% CAJA de comentario
+
+
+%CAJA simple---------------------------------------------------------------------
+\newtcolorbox{wwbox}[1][]{%
+	arc=0mm,breakable,drop fuzzy shadow,
+	enhanced,colback=amarilloEntornos,
+	boxrule=0pt,
+	top=3mm, %Separaci\'on vertical - inicia texto
+	enlarge top by=\baselineskip/2+1mm,
+	enlarge top at break by=0mm,pad at break=2mm,
+	fontupper=\normalsize,
+	%step and label={tcbca}{#3},
+	%Borde
+	overlay unbroken={\draw[color=azulEntornos,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+	},
+	%Borde
+	overlay first={\draw[color=azulEntornos,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+	},
+	%Borde cambio de p\'agina
+	overlay last={\draw[color=azulEntornos,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);}
+	#1}
+
+\newenvironment{scaja}[1][]{\bigskip\begin{wwbox}%
+		#1}{\end{wwbox}}	
+% Fin CAJA simple
+
+%CAJA vocabulario-------------------------------------------------------
+\newtcolorbox{vocabox}[3][]{%
+	arc=0mm,breakable,enhanced,colback=white,boxrule=0pt,
+	top=1mm, left=3pt,
+	step and label={tcbvoca}{#3},
+	fontupper={\small\bf\sffamily {\color{azulEntornos}Vocabulario \thetcbvoca \;#2}}~\normalfont, %"Vocabulario..."+texto del cuerpo
+	overlay unbroken  = {%barra vertical
+		\draw[color=white,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);                 
+	},%
+	overlay first  = {%barra vertical
+		\draw[color=white,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);                 
+	},%
+	% Mantener borde en cambio de p\'agina     
+	overlay last ={\draw[color=white,line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);   },    
+	#1}
+%-
+\NewDocumentEnvironment{vocabulario}{O{} O{} O{}}{\smallskip\begin{vocabox}{#1}{#2}%
+		#3}{\end{vocabox}\smallskip }	
+% Fin vocabulario
+
+%CAJA nota-------------------------------------------------------
+\newtcolorbox{notabox}[1][]{%
+	arc=0mm,breakable,drop fuzzy shadow,
+	enhanced,colback=amarilloEntornos,
+	boxrule=0pt,
+	top=3mm, %Separaci\'on vertical - inicia texto
+	left=10pt,
+	enlarge top by=\baselineskip/2+1mm,
+	enlarge top at break by=0mm,pad at break=2mm,
+	fontupper={
+		{\textbf{\color{verdeEntornos} Nota: }}}~\normalfont,  %"NOTA..."+texto del cuerpo
+	%Borde y c\'irculo
+	overlay first={
+		\draw[color=white,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+	},
+	%Borde y c\'irculo
+	overlay first={
+		\draw[color=white,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);
+	},
+	%Borde cambio de p\'agina
+	overlay last={\draw[color=white,line width=0.5pt] (frame.north west)
+		--([xshift=0pt]frame.north east)
+		--([xshift=0pt]frame.south east)
+		--([xshift=0pt]frame.south west)--(frame.north west);}
+	#1}
+%-
+\newenvironment{nota}[1][]{\bigskip\begin{notabox}%
+		#1}{\end{notabox}}	
+% Fin nota
+
+
+%CAJA notación-------------------------------------------------------
+\newtcolorbox{notacionbox}[3][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,
+	top=6mm,fontupper=\normalsize,step and label={tcbnotacion}{#3},
+	overlay unbroken  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{verdeEntornos} Notaci\'on \thetcbnotacion \;#2}};
+	}, %overlay
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Notaci\'on \thetcbnotacion \;#2}};
+	}, %overlay
+	% Mantener borde en cambio de p***gina
+	overlay last    = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);
+	}
+	#1
+}
+%-
+\NewDocumentEnvironment{notacion}{O{} O{} O{}}{\bigskip\begin{notacionbox}{#1}{#2} #3}{\end{notacionbox}\bigskip }
+% Fin notación
+
+%CAJA algoritmo-------------------------------------------------------
+\newtcolorbox{algoritmobox}[3][]{%
+	arc=0mm,breakable,enhanced,colback=gray!5,boxrule=0pt,
+	top=6mm,fontupper=\normalsize,step and label={tcbalgoritmo}{#3},
+	overlay unbroken  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north east)--([xshift=2pt] frame.south east);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Algoritmo \thetcbalgoritmo \;#2}};
+	}, %overlay
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Notaci\'on \thetcbalgoritmo \;#2}};
+	}, %overlay
+	% Mantener borde en cambio de p***gina
+	overlay last    = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north east)--([xshift=2pt] frame.south east);
+	}
+	#1
+}
+%-
+\NewDocumentEnvironment{algoritmo}{O{} O{} O{}}{\bigskip\begin{algoritmobox}{#1}{#2} #3}{\end{algoritmobox}\bigskip }
+% Fin algoritmo
+
+%CAJA observación-------------------------------------------------------
+\newtcolorbox{observacionbox}[3][]{%
+	arc=0mm,breakable,drop fuzzy shadow,
+	enhanced,colback=gray!5,boxrule=0pt,
+	top=6mm,fontupper=\normalsize,step and label={tcbobservacion}{#3},
+	overlay unbroken  = {      
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Observaci\'on \thetcbobservacion \;#2}};
+	}, %overlay
+	overlay first  = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north west)--([xshift=2pt] frame.south west);        
+		%Caja de T***tulo: defi --
+		\node[wnodeTeorema](titulodefi) at ([xshift=4.5pt, yshift=-3mm]frame.north west)
+		{\textbf{\color{azulTitulos} Observaci\'on \thetcbobservacion \;#2}};
+	}, %overlay
+	% Mantener borde en cambio de p***gina
+	overlay last    = {
+		%barra vertical
+		\draw[color=gray,  line width=3pt] ([xshift=2pt] frame.north east)--([xshift=2pt] frame.south east);
+	}
+	#1
+}
+%-
+\NewDocumentEnvironment{observacion}{O{} O{} O{}}{\bigskip\begin{observacionbox}{#1}{#2} #3}{\end{observacionbox}\bigskip }
+% Fin obsrvación
+
+% Fin mis entornos---------------------------------------------------------------
+
+\endinput
