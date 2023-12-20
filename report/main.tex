@@ -154,7 +154,22 @@ $$
 
 
 
-\subsection{Subsección}
+\subsection{特征相关性}
+
+由于下面要使用线性回归模型，需要先保证数据特征不存在强相关，否则严重的多重共线性将导致线性模型 $C^\top C$ 不满秩，使得线性回归将不存在唯一解，这可能会影响答案的准确性。注意到样本的特征数为 $M = 3072$，设样本协方差阵为 $S$，$V^{1/2} = \mathrm{diag}(\sqrt{S_{11}},  \sqrt{S_{22}},\cdots,\sqrt{S_{MM}})$，相关系数矩阵  $R$ 由以下公式给出:
+$$
+R = (V^{1/2})^{-1}S(V^{1/2})^{-1}b 
+$$
+
+实际计算复杂度为 $N \times M^2$，实际运行却很快，这可能得归功于 numpy 的矩乘优化，统计总计 $3072 \times 3072$个相关系数，绘制其频率(已经划分好分段区间)直方图(参考 Figure 2)
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.33]{./images/pic3}
+	\caption{频率直方图，已经将纵坐标 $\log$ 处理了}
+\end{figure}
+
+计算得到有多达 136496 对特征具有 $\geq 0.7$ 的相关性(情理之中)，之后的进一步工作可以尝试使用降维方法减少多重共线性，那时再做进一步分析。
 
 \subsubsection{Subsubsección}
 

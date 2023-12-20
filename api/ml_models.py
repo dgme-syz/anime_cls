@@ -12,9 +12,12 @@ from scipy.special import softmax
 # from scipy.stats import multivariate_normaltest
 import seaborn as sns
 from pylab import *
+import time
 from scipy.stats import f_oneway
 
-mpl.rcParams['font.sans-serif'] = ['SimHei']
+# 显示中文字符和负数
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 选择一个包含中文字符的字体
+plt.rcParams['axes.unicode_minus'] = False  # 显示负号
 
 
 # # 1. 检验高维数据是否满足正态分布
@@ -45,7 +48,10 @@ def check_cov(data_):
     tip: 可以取其中几个具有代表性质的维度
     """
     # 计算相关系数矩阵
+    start = time.time()
     corr_matrix = np.corrcoef(data_, rowvar=False)
+    end = time.time()
+    print(f"times: {end - start} secs")
     print(corr_matrix.shape)
     num_features_to_select = 10
     num_total_features = data_.shape[1]
@@ -64,10 +70,11 @@ def check_cov(data_):
 
     # 统计相关系数的值
     corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
-
+    large_cor = np.sum(corr_values >= 0.7)
+    print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
     # 绘制直方图
     plt.figure(figsize=(8, 6))
-    plt.hist(corr_values, bins=50, alpha=0.7, color='blue')  # 调整 bins 的数量以获得更细或更粗的直方图
+    plt.hist(corr_values, bins=50, alpha=0.7, color='blue', log=True)  # 调整 bins 的数量以获得更细或更粗的直方图
     plt.title('相关系数直方图')
     plt.xlabel('相关系数值')
     plt.ylabel('频数')
