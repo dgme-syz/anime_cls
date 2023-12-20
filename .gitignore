@@ -39,3 +39,5 @@ DANBOORU
 *.log
 *.aux
 svg-inkscape
+.cph
+test.py
