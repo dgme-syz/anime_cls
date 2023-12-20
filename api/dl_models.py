@@ -25,7 +25,7 @@ class confusion_matrix:
     
 # 两层隐层神经元
 class Net(nn.Module):
-    def __init__(self, w = 64, decompose=100, cls=9):
+    def __init__(self, w=32, decompose=100, cls=9):
         super(Net, self).__init__()
         self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, decompose)
@@ -38,7 +38,7 @@ class Net(nn.Module):
         return x
 
 class KNet(nn.Module):
-    def __init__(self, w=64, decompose=100, cls=9) -> None:
+    def __init__(self, w=32, decompose=100, cls=9) -> None:
         super(KNet, self).__init__()
         self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, 256)
