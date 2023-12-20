@@ -46,18 +46,6 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
-    
-    cnt1, cnt2 = [0] * 9, [0] * 9
-    for i in range(len(tr_y)):
-        cnt1[tr_y[i]] += 1
-    for i in range(len(te_y)):
-        cnt2[te_y[i]] += 1
-    print("Train: ")
-    for i in range(9):
-        print(f"{names[i]} : {cnt1[i]}")
-    print("Test: ")
-    for i in range(9):
-        print(f"{names[i]} : {cnt2[i]}")
     ###
 
 
