@@ -23,8 +23,8 @@ def dl():
     train_data = DatasetFromFolder(os.path.join(data_dir, "ANIME"), names)
     test_data = DatasetFromFolder(os.path.join(data_dir, "DANBOORU"), names)
 
-    train_iter = DataLoader(train_data, batch_size=32, shuffle=True)
-    test_iter = DataLoader(test_data, batch_size=32, shuffle=False)
+    train_iter = DataLoader(train_data, batch_size=256, shuffle=True)
+    test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
     net = ResNet18(9).to(device)
@@ -46,9 +46,6 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
-
-    check_nor(tr_X)
-    check_nor(te_X)
     ###
 
 

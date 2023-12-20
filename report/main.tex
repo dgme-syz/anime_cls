@@ -42,7 +42,6 @@
 	pdfsubject={Descripción breve del artículo}, % No es copiar el abstract, sino escribir una descripción muy breve
 	pdfkeywords={palabras clave, keywords}, % Palabras clae en español e inglés 
 	%------------Las siguientes líneas no se deben cambiar--------%
-	pdfcreator={pdflatex}
 }
 % Agregar acá todos los paquetes y definiciones personales que de manera adicional se necesiten para el artículo 
 
@@ -87,27 +86,59 @@
 
 \begin{document}%-----------------------------------------------------
 	% Construye el Pie de p\'agina, poner el título nuevamente y los autores en forma resumida (Apellido, N.)
-	\offprintinfo{Título del artículo}{Autor 1, Autor 2, Autor 3}
+	\offprintinfo{$\mathrm{NUAA}$·人工智能}{沈运之, 黄开奕, 徐行}
 	
 	% Hace el título, los autores y las fechas (no cambiar)
 	\maketitle
 
-\begin{abstract}
-	Paper abstract goes here
-\end{abstract}
 
 \begin{keywords}
 	\textcolor{purple1}{图像分类\ 降维 \ 判别 \ 多因变变量线性回归 \ 假设检验}
 \end{keywords}
 
-\section{Introducción}
-\label{sec:introduccion}
+\section{介绍}
+\subsection{概要}
+统计学习中，分类问题应该算得上是一个相当经典的模型，大多数方法都可以参与这一问题的解决，基于此，用分类问题来应用多元统计分析所学到的知识再合适不过。
 
-La introducción del artículo.
+分类问题中，图像分类占据了很大程度的一部分，然后，现实中的图片分类问题要经过传感器获取，以及Jpeg 压缩一系列退化的过程，其一般受噪声影响较为严重，所以我们选择了产生于互联网上的图片，即动漫人物的图片构建我们的分类问题(其实单纯是因为兴趣)。
 
-Ejemplo para hacer referencia a una sección, en la Sección \ref{sec:introduccion}.
+该图片数据集主要由两个文件夹构成，ANIME 文件夹用于训练，DANBOORU 文件夹用于测试，其中包含 9 个类别，分别是 Blue Mountain，Chino，Chiya，Cocoa，Maya，Megumi，Mocha，Rize，Sharo对应数字 0-8；ANIME 包含 59579 张图片，DANBOORU 包含 9141 张图片，初始文件夹里包含(通道数为 $3$)从 26 $\times $ 26，到 987 $\times$ 987 尺寸不一的图片，为了便于处理，已经经过 python 脚本统一处理为 32 $\times $ 32。原数据集来源于 Kaggle:\href{https://www.kaggle.com/datasets/rignak/gochiusa-faces}{https://www.kaggle.com/datasets/rignak/gochiusa-faces}。
 
-\section{Sección}
+\subsection{解决方案}
+
+首先我们小组成员自行充当分类器，分类效果非常好，因此这个学习问题是理论上可以实现。下面我将阐述这份实验提供的解决方案：
+
+\begin{nota}
+	
+1. 首先观察图片数据的特征是否近似满足正态分布，以及初步构建对于数据认识。
+
+2. 然后基于先验，选择合适的方法进行降维，并将降至二维进行可视化。
+
+3. 对于不同的降维结果，使用基于模型的多因变量的线性回归，SVM，以及 model-free 的基于决策树的分类器进行测试，挑选出最好的结果。
+
+4. 基于以上结果进行分析。
+
+\end{nota}
+
+\subsection{符号约定}
+
+为了便于叙述，这里规定 $N$ 为数据集样本数，$M$ 为每个样本的特征，这里定义每个样本的特征为图片张量向量化的结果，$X$ 为 $N \times M$ 的数据矩阵，$Y$ 为 $N \times 1$ 的标签向量，其中 $y_i \in Z \mbox{ and } y_i \in [0,8]$，约定每一个样本为 $X_i^\top = \begin{bmatrix}x_{i1} & \cdots & x_{iM}\end{bmatrix}$，对应标签为 $y_i$，从而有：
+
+\begin{align}
+	X = \begin{bmatrix}
+		X_1^\top \\ X_2^\top \\\vdots \\ X_N^\top 
+	\end{bmatrix} = \begin{bmatrix}
+	x_{11} & x_{12} & \cdots & x_{1M}\\
+	x_{21} & x_{22} & \cdots & x_{2M} \\
+	\vdots & & &\vdots\\
+	x_{N1} & x_{N2} & \cdots & x_{NM}
+	\end{bmatrix}\quad\quad Y = \begin{bmatrix}
+	y_1\\y_2\\ \vdots \\ y_N \notag
+	\end{bmatrix}
+\end{align}
+
+
+\section{}
 
 \subsection{Subsección}
 

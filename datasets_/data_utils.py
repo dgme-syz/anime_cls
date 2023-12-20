@@ -27,7 +27,7 @@ class DatasetFromFolder(Dataset):
         for file_path, label in self.img_filenames:
             # bgr -> rgb
             img = cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2RGB)
-            X.append(img)
+            X.append(img.flatten('F')) # 按列展开
             y.append(label)
         return X, y
     def __getitem__(self, index):

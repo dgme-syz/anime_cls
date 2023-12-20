@@ -97,7 +97,7 @@
 		\begin{center}
 			{\Large\bfseries #1}\\[0.22cm]
 		\end{center}
-		\revistaheaderA{V\lowercase{ol #3, }N\lowercase{o #4. }  #5 $ - $  #6}
+		%\revistaheaderA{V\lowercase{ol #3, }N\lowercase{o #4. }  #5 $ - $  #6}
 		\medskip
 	}
 }
@@ -342,11 +342,7 @@
 	\def\dofnote#1#2{\vtop{\hyphenpenalty=10000
 	\advance\hsize -10pt \raggedright
 	\footnotesize{\it #1. }{ #2}\\
-	\noindent\hbox{\footnotesize
-	Derechos Reservados \copyright\ \thecopyrightyear\ Revista digital Matem\'atica, Educaci\'on e Internet
-	 {\sffamily \scriptsize \href{  
-	 https://revistas.tec.ac.cr/index.php/matematica}{(https://revistas.tec.ac.cr/index.php/matematica)}}}}}
-	
+	}}
 	\def\offprintinfo#1#2{
 	\def\theoffprint{\bgroup\frenchspacing
 	\dofnote{#1}{#2}
@@ -382,7 +378,7 @@
 	\vspace{-2cm}
 	\textcolor{lightgray}{\rule[0.5cm]{\textwidth}{4pt}}\\[-0.2cm]
 	\begin{minipage}{0.4\textwidth}
-		\includesvg[width=5cm]{images/logo.svg}
+		\includesvg[width=6cm]{images/logo.svg}
 		\vspace{10pt}
 	\end{minipage}
 	\begin{minipage}{0.45\textwidth}
