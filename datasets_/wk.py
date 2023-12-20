@@ -2,7 +2,7 @@ import argparse
 from PIL import Image
 import os
 
-def resize_images(input_dir, target_size=(64, 64, 3), progress_interval=100, count=0):
+def resize_images(input_dir, target_size=(32, 32, 3), progress_interval=100, count=0):
     # 遍历输入目录中的所有文件
     for filename in os.listdir(input_dir):
         input_path = os.path.join(input_dir, filename)
