@@ -9,43 +9,34 @@ from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier
 from scipy.special import softmax
-from scipy.stats import anderson
+# from scipy.stats import multivariate_normaltest
 import seaborn as sns
 from pylab import *
 from scipy.stats import f_oneway
 
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 
-# 1. 检验高维数据是否满足正态分布
-def check_nor(data_):
-    """
-    输入: 样本数 x 样本特征的二维矩阵(9000 x 12000)
-    输出: 通过检验的置信度判断是否近似满足正态分布
-    tip: 可以取其中几个具有代表性质的维度展现是否近似满足正态分布
-    """
-    alpha_list=[0.01, 0.05, 0.1]
-    num_samples, num_features = data_.shape
-    passed_dimensions = {alpha: [] for alpha in alpha_list}
-    min_alpha = None
 
-    for alpha in alpha_list:
-        for feature_idx in range(num_features):
-            # 提取当前维度的数据
-            feature_data = data_[:, feature_idx]
+# # 1. 检验高维数据是否满足正态分布
+# def check_nor(data_):
+#     """
+#     输入: 样本数 x 样本特征的二维矩阵(9000 x 12000)
+#     输出: 通过检验的置信度判断是否近似满足正态分布
+#     tip: 可以取其中几个具有代表性质的维度展现是否近似满足正态分布
+#     """
+#     alpha_values = [0.1, 0.21]
+#
+#     # 进行Shapiro-Wilk检验并观察不同显著性水平下的结果
+#     for alpha in alpha_values:
+#         statistic, p_value = multivariate_normaltest(data_)
+#         print(f"显著性水平为 {alpha} 时的Shapiro-Wilk统计量: {statistic}, p值: {p_value}")
+#
+#         if p_value >= alpha:
+#             print(f"在显著性水平为 {alpha} 下，接受原假设，数据可能在这个水平下近似服从正态分布。\n")
+#         else:
+#             print(f"在显著性水平为 {alpha} 下，拒绝原假设，数据不在这个水平下近似服从正态分布。\n")
 
-            # 进行 Anderson-Darling 测试
-            result = anderson(feature_data)
 
-            # 检查统计量是否小于临界值，以判断是否通过检验
-            if result.statistic < result.critical_values[2]:
-                passed_dimensions[alpha].append(feature_idx)
-
-        # 记录最低的显著性水平
-        if not min_alpha or alpha < min_alpha:
-            min_alpha = alpha
-
-    return passed_dimensions, min_alpha
- 
 # 2. 检验数据相关性质，绘制相关系数矩阵，用热力图表示
 def check_cov(data_):
     """
@@ -55,12 +46,34 @@ def check_cov(data_):
     """
     # 计算相关系数矩阵
     corr_matrix = np.corrcoef(data_, rowvar=False)
+    print(corr_matrix.shape)
+    num_features_to_select = 10
+    num_total_features = data_.shape[1]
+    selected_feature_indices = np.random.choice(num_total_features, num_features_to_select, replace=False)
+
+    # 选取对应的子矩阵
+    selected_cov_matrix = corr_matrix[selected_feature_indices][:, selected_feature_indices]
 
     # 绘制热力图
-    plt.figure(figsize=(12, 10))
-    sns.heatmap(corr_matrix, cmap='coolwarm', annot=True, fmt=".2f", cbar_kws={'label': 'Correlation Coefficient'})
-    plt.title('Correlation Matrix Heatmap')
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(selected_cov_matrix, cmap='coolwarm', annot=True, fmt=".2f", cbar_kws={'label': 'Covariance'})
+    plt.title('Covariance Matrix Heatmap for 10 Random Features')
     plt.show()
+    # 将相关系数矩阵展平为一维数组
+    flatten_corr = corr_matrix.flatten()
+
+    # 统计相关系数的值
+    corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
+
+    # 绘制直方图
+    plt.figure(figsize=(8, 6))
+    plt.hist(corr_values, bins=50, alpha=0.7, color='blue')  # 调整 bins 的数量以获得更细或更粗的直方图
+    plt.title('相关系数直方图')
+    plt.xlabel('相关系数值')
+    plt.ylabel('频数')
+    plt.grid(True)
+    plt.show()
+
 
 # 3. 为了保证距离判别法的有效性，需要先检验类别是否具有显著性差异
 def check_dif(X, y):
@@ -94,6 +107,7 @@ def check_dif(X, y):
 tr_X 是一个矩阵, tr_y 是一个 0-8 的数字, 表示标签
 """
 
+
 def pca_method(tr_X, te_X):
     """
     输入: 训练集的特征 tr_X, 测试集的特征 te_X
@@ -109,6 +123,7 @@ def pca_method(tr_X, te_X):
     te_X_pca = pca.transform(te_X)
 
     return tr_X_pca, te_X_pca
+
 
 def ker_pca_method(tr_X, te_X):
     """
@@ -169,6 +184,7 @@ def decision_tree_method(tr_X, tr_y, te_X, te_y):
     plt.xlabel('预测标签')
     plt.ylabel('真实标签')
     plt.show()
+
 
 def multivariables_linear_regression(tr_X, tr_y, te_X, te_y):
     """

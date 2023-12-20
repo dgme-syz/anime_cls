@@ -6,7 +6,7 @@ from pathlib import Path
 from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
-from api.ml_models import *
+from api.ml_models import check_cov
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
@@ -41,11 +41,16 @@ def ml():
     train_data = DatasetFromFolder(os.path.join(data_dir, "ANIME"), names)
     test_data = DatasetFromFolder(os.path.join(data_dir, "DANBOORU"), names)
 
-    te_X, te_y = test_data.ml_data()           
     tr_X, tr_y = train_data.ml_data()
+    te_X, te_y = test_data.ml_data()
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
+    tr_X_array = np.array(tr_X)
+    te_X_array = np.array(te_X)
+    # check_nor(tr_X_array)
+    # check_nor(te_X_array)
+    check_cov(te_X_array)
     ###
 
 
