@@ -28,10 +28,12 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, decompose)
+        self.bn1 = nn.BatchNorm1d(decompose)  # 添加批归一化层
         self.dense2 = torch.nn.Linear(decompose, 9)
+        self.bn2 = nn.BatchNorm1d(9)  # 添加批归一化层
     def forward(self, x):
         x = self.f(x) #
-        x = self.dense2(F.tanh(self.dense1(x)))
+        x = self.bn2(self.dense2(self.bn1(F.relu(self.dense1(x)))))
         return x
 
 # 定义基本的残差块

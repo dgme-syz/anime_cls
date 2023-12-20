@@ -13,6 +13,9 @@ base_dir = Path(__file__).parent.absolute().__str__()
 data_dir = os.path.join(base_dir, "datasets_", "data")
 
 if __name__ == '__main__':
+    # 0. print 设备
+    print(device)
+    
     # 1. load 数据
     test_data = DatasetFromFolder(os.path.join(data_dir, "ANIME"), names)
     train_data = DatasetFromFolder(os.path.join(data_dir, "DANBOORU"), names)
@@ -21,7 +24,7 @@ if __name__ == '__main__':
     test_iter = DataLoader(test_data, batch_size=32, shuffle=False)
 
     # 2. load 模型
-    net = ResNet18(9).to(device)
+    net = Net().to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
