@@ -3,6 +3,7 @@ import numpy as np
 import torch.nn as nn
 from torch.optim import Adam
 from pathlib import Path
+from sklearn.preprocessing import StandardScaler
 from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
@@ -43,6 +44,11 @@ def ml():
 
     tr_X, tr_y = train_data.ml_data()
     te_X, te_y = test_data.ml_data()
+
+    scaler = StandardScaler()
+
+    tr_X = scaler.fit_transform(tr_X)
+    te_X = scaler.transform(te_X)
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
