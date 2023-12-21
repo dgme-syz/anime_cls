@@ -94,11 +94,8 @@ def check_cov(data_):
 
     # 统计相关系数的值
     corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
-<<<<<<< HEAD
-=======
     large_cor = np.sum(corr_values >= 0.7)
     print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
->>>>>>> 31ef906aa8e1120b06466e794ac0221930e3c84e
     # 绘制直方图
     plt.figure(figsize=(8, 6))
     plt.hist(corr_values, bins=50, alpha=0.7, color='blue', log=True)  # 调整 bins 的数量以获得更细或更粗的直方图

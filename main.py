@@ -56,7 +56,7 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
-<<<<<<< HEAD
+
     tr_X_array = np.array(tr_X)
     te_X_array = np.array(te_X)
     # check_nor(tr_X_array)
@@ -65,7 +65,7 @@ def ml():
     end_time = time.time()
     print(end_time-start_time)
     # check_dif(te_X_array, te_y)
-=======
+
     tr_X = np.array(tr_X)
     te_X = np.array(te_X)
     tr_X, te_X = pca_method(tr_X, te_X)
@@ -84,12 +84,8 @@ def ml():
 
         ####
 
-<<<<<<< HEAD
-    # pca(tr_X, tr_y, te_X, te_y)
-=======
     pca(tr_X, tr_y, te_X, te_y)
->>>>>>> 31ef906aa8e1120b06466e794ac0221930e3c84e
->>>>>>> bf385f4d1231fcabeddaa2776d8c2be523bb766a
+
     ###
 
 
