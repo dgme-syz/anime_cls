@@ -192,14 +192,64 @@ $$
 \end{enumerate}
 \end{observacion}
 使用这样的数据来训练传统模型是不可行的，由于本身该分类问题属于不太难的学习问题，只是用少量特征来学习大概率可行，接下来考虑使用降维方法对数据进行简化。
+
+
+\subsection{分类器介绍}
+
+\subsubsection{多因变量线性回归}
+
+基于 softmax 回归的思想，回归问题可以通过拟合在每个类别出现的概率($9\times 1$向量)再使用 softmax 函数转化为一个分类问题，因此这里可以将标签向量 $Y$ 的所有分量 $y_i$ 处理成独热编码的形式。
+
+设有 $k$(降维后特征的个数) 个自变量，$p$($p = 9$)个因变量，降维后数据矩阵 $X^*$ 为 $N\times k$ 的矩阵，其中每一行代表一个样本的特征，这里新引入因变量矩阵 $Y^*$，其具有如下形式:
+
+$$
+Y^* = \begin{bmatrix}
+	y_{11} & y_{12}&\cdots &y_{1p}\\
+	y_{21} & y_{22} & \cdots &y_{2p}\\
+	\vdots & & &\vdots\\
+	y_{N1} & y_{N2} & \cdots &y_{Np}
+\end{bmatrix}
+$$
+
+其中 $\begin{bmatrix}
+	y_{i1}&\cdots&y_{ip}
+\end{bmatrix}^\top$是初始标签向量 $Y$ 的分量 $y_i$ 产生的独热编码。
+
+因此学习问题转化为模型:
+
+$$
+\begin{cases}
+	Y^* = (\mathbf{1}_N | X^*) \beta + E = C\beta + E\\\\
+	\epsilon_{(i)} \sim N_p(0,\Sigma), \epsilon_i \perp \epsilon_j (i \ne j)
+\end{cases}
+$$
+
+其中$E^\top = \begin{bmatrix}
+	\epsilon_{(1)} & \cdots& \epsilon_{(N)} 
+\end{bmatrix}$，$\beta:(k + 1) \times p$，$\beta$ 的最小二乘估计为:
+
+\begin{teorema}
+$$\hat{\beta} = (C^\top C)^{-1} C^\top Y$$
+\end{teorema}
+
+最终的模型就是线性回归模型输出向量中分量最大值对应的下标为预测类别。
+
+\subsection{判别分析}
+判别分析也可以解决新样品的归属问题，因此可以使用判别分析解决分类问题，判别分析中我们选取了广义平方距离判别法以及贝叶斯判别法，前者基于频率统计学，后者基于贝叶斯统计学，刚好可以用来直观感受二者的差异。
+
+\subsubsection{距离判别}
+
+\subsubsection{贝叶斯判别}
+
 \subsection{PCA降维}
 最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：
 
 \begin{lema}
 $$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$$
 \end{lema}
- 
-实验设置 $k=100$，得到对应的 ratio 为 85.7\%，理论上效果不错。进一步，下面考虑
+
+实验设置 $k=100$，得到对应的 ratio 为 85.7\%，理论上效果不错。下面考虑将其实际部署至分类器分析效果。
+
 
 %-------------Uso de los entornos-------------%
 

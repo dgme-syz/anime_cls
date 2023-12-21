@@ -8,6 +8,8 @@ from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
 from api.ml_models import *
+from scipy.stats import chi2
+import matplotlib.pyplot as plt
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
@@ -54,6 +56,32 @@ def ml():
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
     tr_X = np.array(tr_X)
     te_X = np.array(te_X)
+    tr_X, te_X = pca_method(tr_X, te_X)
+
+    ###
+    C = [[] for _ in range(9)]
+    for i in range(len(tr_y)):
+        C[tr_y[i]].append(tr_X[i])
+    for i in range(9):
+        d = []
+        G = np.array(C[i])
+        print(G.shape)
+        mu =  np.mean(C[i], axis=0).reshape(-1, 1)
+        sigma_inv = np.linalg.inv(np.cov(G.T))
+        print(sigma_inv.shape)
+        for j in range(len(C[i])):
+            x = C[i][j].reshape(-1, 1)
+            d.append((x - mu).T @ sigma_inv @ (x - mu))
+        d.sort()
+        y, n = [], len(d)
+        for i in range(n):
+            y.append(chi2.ppf((i + 0.5) / n, 100))
+        plt.scatter(d, y)
+        plt.plot([0, 350], [0, 350])
+        plt.show()
+        break
+    ###
+
 
     ###
     #  测试
@@ -66,7 +94,7 @@ def ml():
 
         ####
 
-    pca(tr_X, tr_y, te_X, te_y)
+    # pca(tr_X, tr_y, te_X, te_y)
     ###
 
 
