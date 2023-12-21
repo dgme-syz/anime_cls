@@ -32,7 +32,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = ResNet18(9).to(device)
+    net = Net().to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -67,8 +67,20 @@ def ml():
         #### 如下填写各个模型的测试信息
 
         ####
+    # pca(tr_X, tr_y, te_X, te_y)
+    def dl_decompose(train_X, train_y, test_X, test_y):
+        net = Net()
+        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt")))
+        def convert(data_):
+            return net.dense1(torch.tensor(data_, dtype=torch.float32).unsqueeze(0))[0].detach().numpy()
+        train_X, test_X = convert(train_X), convert(test_X)
+        assert train_X.shape[1] == 100
+        check_nor(train_X, train_y)
+    # dl_decompose(tr_X, tr_y, te_X, te_y)
 
-    pca(tr_X, tr_y, te_X, te_y)
+    def flda(train_X, train_y, test_X, test_y):
+        train_X, test_X = flda_method(train_X, test_X)
+    # flda(tr_X, tr_y, te_X, te_y)
     ###
 
 

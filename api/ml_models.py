@@ -37,7 +37,7 @@ def check_nor(data_, labels):
             x = x.reshape(-1, 1)
             val = (x - mean_vector).T @ cov_matrix_inv @ (x - mean_vector)
             mahalanobis_distances.append(val[0][0])
-        print('m', mahalanobis_distances)
+        # print('m', mahalanobis_distances)
         sorted_distances = sorted(mahalanobis_distances)
 
         p_t = (np.arange(1, num_samples + 1) - 0.5) / num_samples
