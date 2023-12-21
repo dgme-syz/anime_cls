@@ -32,7 +32,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = ResNet18(9).to(device)
+    net = Net().to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
