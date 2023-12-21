@@ -11,10 +11,13 @@ from sklearn.tree import DecisionTreeClassifier
 from scipy.special import softmax
 import seaborn as sns
 from pylab import *
+import time
 from scipy.stats import f_oneway
 from scipy.stats import chi2
 
-mpl.rcParams['font.sans-serif'] = ['SimHei']
+# 显示中文字符和负数
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 选择一个包含中文字符的字体
+plt.rcParams['axes.unicode_minus'] = False  # 显示负号
 
 
 # 1. 检验高维数据是否满足正态分布
@@ -69,7 +72,10 @@ def check_cov(data_):
     tip: 可以取其中几个具有代表性质的维度
     """
     # 计算相关系数矩阵
+    start = time.time()
     corr_matrix = np.corrcoef(data_, rowvar=False)
+    end = time.time()
+    print(f"times: {end - start} secs")
     print(corr_matrix.shape)
     num_features_to_select = 10
     num_total_features = data_.shape[1]
@@ -88,9 +94,14 @@ def check_cov(data_):
 
     # 统计相关系数的值
     corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
+<<<<<<< HEAD
+=======
+    large_cor = np.sum(corr_values >= 0.7)
+    print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
+>>>>>>> 31ef906aa8e1120b06466e794ac0221930e3c84e
     # 绘制直方图
     plt.figure(figsize=(8, 6))
-    plt.hist(corr_values, bins=50, alpha=0.7, color='blue')  # 调整 bins 的数量以获得更细或更粗的直方图
+    plt.hist(corr_values, bins=50, alpha=0.7, color='blue', log=True)  # 调整 bins 的数量以获得更细或更粗的直方图
     plt.title('相关系数直方图')
     plt.xlabel('相关系数值')
     plt.ylabel('频数')
@@ -131,20 +142,20 @@ tr_X 是一个矩阵, tr_y 是一个 0-8 的数字, 表示标签
 """
 
 
-def pca_method(tr_X, te_X):
+def pca_method(tr_X, te_X, decompose=100):
     """
     输入: 训练集的特征 tr_X, 测试集的特征 te_X
     输出: 使用 pca 对于 tr_X 做降维(自行选择一个降维的合适维度) 
           然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
     """
     # 使用PCA对训练集进行降维
-    n_components = 10  # 自定义降维的合适维度
+    n_components = decompose  # 自定义降维的合适维度
     pca = PCA(n_components=n_components)
     tr_X_pca = pca.fit_transform(tr_X)
-
+    total_explained_variance_ratio = np.sum(pca.explained_variance_ratio_)
+    print(f"整体方差解释比例: {total_explained_variance_ratio}")
     # 使用训练好的PCA对测试集进行降维
     te_X_pca = pca.transform(te_X)
-
     return tr_X_pca, te_X_pca
 
 
