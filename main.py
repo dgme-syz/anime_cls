@@ -1,4 +1,6 @@
 import os, torch
+import time
+
 import numpy as np
 import torch.nn as nn
 from torch.optim import Adam
@@ -54,34 +56,22 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
+<<<<<<< HEAD
+    tr_X_array = np.array(tr_X)
+    te_X_array = np.array(te_X)
+    # check_nor(tr_X_array)
+    start_time = time.time()
+    check_nor(te_X_array, te_y)
+    end_time = time.time()
+    print(end_time-start_time)
+    # check_dif(te_X_array, te_y)
+=======
     tr_X = np.array(tr_X)
     te_X = np.array(te_X)
     tr_X, te_X = pca_method(tr_X, te_X)
 
-    ###
-    C = [[] for _ in range(9)]
-    for i in range(len(tr_y)):
-        C[tr_y[i]].append(tr_X[i])
-    for i in range(9):
-        d = []
-        G = np.array(C[i])
-        print(G.shape)
-        mu =  np.mean(C[i], axis=0).reshape(-1, 1)
-        sigma_inv = np.linalg.inv(np.cov(G.T))
-        print(sigma_inv.shape)
-        for j in range(len(C[i])):
-            x = C[i][j].reshape(-1, 1)
-            d.append((x - mu).T @ sigma_inv @ (x - mu))
-        d.sort()
-        y, n = [], len(d)
-        for i in range(n):
-            y.append(chi2.ppf((i + 0.5) / n, 100))
-        plt.scatter(d, y)
-        plt.plot([0, 350], [0, 350])
-        plt.show()
-        break
-    ###
 
+    ###
 
     ###
     #  测试
@@ -94,7 +84,12 @@ def ml():
 
         ####
 
+<<<<<<< HEAD
     # pca(tr_X, tr_y, te_X, te_y)
+=======
+    pca(tr_X, tr_y, te_X, te_y)
+>>>>>>> 31ef906aa8e1120b06466e794ac0221930e3c84e
+>>>>>>> bf385f4d1231fcabeddaa2776d8c2be523bb766a
     ###
 
 
