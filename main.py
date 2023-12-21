@@ -1,4 +1,6 @@
 import os, torch
+import time
+
 import numpy as np
 import torch.nn as nn
 from torch.optim import Adam
@@ -7,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
-from api.ml_models import check_cov
+from api.ml_models import *
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
@@ -55,19 +57,14 @@ def ml():
     tr_X_array = np.array(tr_X)
     te_X_array = np.array(te_X)
     # check_nor(tr_X_array)
-    # check_nor(te_X_array)
-    check_cov(te_X_array)
+    start_time = time.time()
+    check_nor(te_X_array, te_y)
+    end_time = time.time()
+    print(end_time-start_time)
+    # check_dif(te_X_array, te_y)
     ###
 
 
 if __name__ == '__main__':
     # dl()
     ml()
-
-
-
-
-
-
-
-

@@ -9,32 +9,56 @@ from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier
 from scipy.special import softmax
-# from scipy.stats import multivariate_normaltest
 import seaborn as sns
 from pylab import *
 from scipy.stats import f_oneway
+from scipy.stats import chi2
 
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 
 
-# # 1. 检验高维数据是否满足正态分布
-# def check_nor(data_):
-#     """
-#     输入: 样本数 x 样本特征的二维矩阵(9000 x 12000)
-#     输出: 通过检验的置信度判断是否近似满足正态分布
-#     tip: 可以取其中几个具有代表性质的维度展现是否近似满足正态分布
-#     """
-#     alpha_values = [0.1, 0.21]
-#
-#     # 进行Shapiro-Wilk检验并观察不同显著性水平下的结果
-#     for alpha in alpha_values:
-#         statistic, p_value = multivariate_normaltest(data_)
-#         print(f"显著性水平为 {alpha} 时的Shapiro-Wilk统计量: {statistic}, p值: {p_value}")
-#
-#         if p_value >= alpha:
-#             print(f"在显著性水平为 {alpha} 下，接受原假设，数据可能在这个水平下近似服从正态分布。\n")
-#         else:
-#             print(f"在显著性水平为 {alpha} 下，拒绝原假设，数据不在这个水平下近似服从正态分布。\n")
+# 1. 检验高维数据是否满足正态分布
+def check_nor(data_, labels):
+    unique_labels = np.unique(labels)
+    fig, axs = plt.subplots(nrows=3, ncols=3, figsize=(12, 12))  # 调整图的大小和子图的布局
+
+    # 对每个类别执行操作
+    for i, label in enumerate(unique_labels):
+        data_class = data_[labels == label]
+        num_samples, num_features = data_class.shape
+        print(data_class[0].shape)
+        mean_vector = np.mean(data_class, axis=0)
+        cov_matrix = np.cov(data_class, rowvar=False)
+        mahalanobis_distances = np.array(
+            [np.sqrt(np.dot(np.dot((x - mean_vector).T, np.linalg.inv(cov_matrix)), (x - mean_vector))) for x in
+             data_class])
+        print('m', mahalanobis_distances)
+        sorted_distances_indices = np.argsort(mahalanobis_distances)
+        sorted_distances = mahalanobis_distances[sorted_distances_indices]
+
+        p_t = (np.arange(1, num_samples + 1) - 0.5) / num_samples
+        chi_square_t = chi2.ppf(p_t, df=num_features)
+        print('c', chi_square_t)
+        print('bi', chi_square_t/mahalanobis_distances)
+
+        for i in range(3):  # 假设你有3行
+            for j in range(3):  # 假设你有3列
+                label = 3 * i + j  # 计算类别标签（假设每行有3个子图）
+                # 假设你有 sorted_distances 和 chi_square_t 数据
+                axs[i, j].scatter(sorted_distances, chi_square_t, label=f'Class {label}', color='blue', alpha=0.6,
+                                  marker='o')
+
+                # 添加斜率为1的线
+                axs[i, j].plot(sorted_distances, sorted_distances, color='red', linestyle='--', label='Slope 1 Line')
+
+                axs[i, j].set_xlabel('Mahalanobis Distance')
+                axs[i, j].set_ylabel('Chi-Square Percentile')
+                axs[i, j].set_title(f'Class {label}')
+                axs[i, j].legend()
+                axs[i, j].grid(True)
+
+    plt.tight_layout()
+    plt.show()
 
 
 # 2. 检验数据相关性质，绘制相关系数矩阵，用热力图表示
@@ -64,7 +88,6 @@ def check_cov(data_):
 
     # 统计相关系数的值
     corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
-
     # 绘制直方图
     plt.figure(figsize=(8, 6))
     plt.hist(corr_values, bins=50, alpha=0.7, color='blue')  # 调整 bins 的数量以获得更细或更粗的直方图
@@ -84,11 +107,11 @@ def check_dif(X, y):
     unique_labels = np.unique(y)
 
     for label in unique_labels:
-        # 获取每个类别的样本特征
+        # 获取当前类别的样本特征
         features_for_label = X[y == label]
 
-        # 进行方差分析
-        f_statistic, p_value = f_oneway(*[X[y == k] for k in unique_labels])
+        # 进行方差分析，这里使用当前类别的数据
+        f_statistic, p_value = f_oneway(*[features_for_label, *[X[y == k] for k in unique_labels if k != label]])
 
         # 输出结果
         print(f"类别 {label}:")
@@ -97,7 +120,7 @@ def check_dif(X, y):
 
         # 判断显著性水平（通常使用0.05）来确定是否拒绝原假设
         alpha = 0.05
-        if p_value < alpha:
+        if any(p_value < alpha):
             print("拒绝原假设，类别之间存在显著性差异。")
         else:
             print("未拒绝原假设，类别之间没有显著性差异。")
