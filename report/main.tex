@@ -102,7 +102,7 @@
 
 分类问题中，图像分类占据了很大程度的一部分，然后，现实中的图片分类问题要经过传感器获取，以及Jpeg 压缩一系列退化的过程，其一般受噪声影响较为严重，所以我们选择了产生于互联网上的图片，即动漫人物的图片构建我们的分类问题(其实单纯是因为兴趣)。
 
-该图片数据集主要由两个文件夹构成，ANIME 文件夹用于训练，DANBOORU 文件夹用于测试，其中包含 9 个类别，分别是 Blue Mountain，Chino，Chiya，Cocoa，Maya，Megumi，Mocha，Rize，Sharo对应数字 0-8；ANIME 包含 59579 张图片，DANBOORU 包含 9141 张图片，初始文件夹里包含(通道数为 $3$)从 26 $\times $ 26，到 987 $\times$ 987 尺寸不一的图片，为了便于处理，已经经过 python 脚本统一处理为 32 $\times $ 32。原数据集来源于 Kaggle:\href{https://www.kaggle.com/datasets/rignak/gochiusa-faces}{https://www.kaggle.com/datasets/rignak/gochiusa-faces}。
+该图片数据集主要由两个文件夹构成，ANIME 文件夹用于训练，DANBOORU 文件夹用于测试，其中包含 9 个类别，分别是 Blue Mountain，Chino，Chiya，Cocoa，Maya，Megumi，Mocha，Rize，Sharo对应数字 0-8；ANIME 包含 59579 张图片，DANBOORU 包含 9141 张图片，初始文件夹里包含(通道数为 $3$)从 26 $\times $ 26，到 987 $\times$ 987 尺寸不一的图片，为了便于处理，已经经过 python 脚本统一处理为 32 $\times $ 32。原数据集来源于 Kaggle:\href{https://www.kaggle.com/datasets/rignak/gochiusa-faces}{\url{https://www.kaggle.com/datasets/rignak/gochiusa-faces}}。
 
 \subsection{解决方案}
 
@@ -152,6 +152,19 @@ $$
 	\caption{各类别训练集与测试集的分类情况，横轴为类别对应的样本数目，且采用对数刻度}
 \end{figure}
 
+\subsubsection{类别分布}
+
+判别分析假设每个总体数据服从正态分布，此时 FLDA 效果达到最优，检验一下各个类别是否近似服从 $M$ 元态分布很有必要，同时也可以为判别法的有效性分析做个铺垫。
+
+一个简单的方式是，当原假设 $H_0:X\sim N_M(\mu,\Sigma)$ 成立时，数据总体 $X$ 具有如下性质：
+
+\begin{lema}
+$$
+D^2 = (X - \mu)^\top \Sigma^{-1} (X - \mu) \sim \chi^2(M)
+$$
+\end{lema}
+
+因此，可以考虑绘制$\chi^2$ 统计量的 Q-Q 图，设 $D_{(t)}^2$ 为排序后第 $t$ 个样本的马氏距离，以及 $\chi_t^2$ 为 $\chi^2(M)$ 对应的分位数，通过观察 $(D_{(t)}^2,\chi_t^2)(t = 1,\cdots,N)$ 散点图是否近似分布在斜率为 1 的直线上来检验其正态性
 
 
 \subsection{特征相关性}
@@ -166,12 +179,24 @@ $$
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.33]{./images/pic3}
-	\caption{频率直方图，已经将纵坐标 $\log$ 处理了}
+	\caption{频率直方图，已经将纵坐标处理为 $\log$ 尺度}
 \end{figure}
 
 计算得到有多达 136496 对特征具有 $\geq 0.7$ 的相关性(情理之中)，之后的进一步工作可以尝试使用降维方法减少多重共线性，那时再做进一步分析。
 
-\subsubsection{Subsubsección}
+
+\section{降维}
+现在，我们已经对数据(训练集)有了先验认知，发现数据集存在以下几个问题：
+\begin{observacion}
+\begin{enumerate}
+	\item 样本特征维度过大，这无论是对于存储与速度都提出了极大的要求。
+	\item 特征之间存在不可忽视的相关性。
+\end{enumerate}
+\end{observacion}
+使用这样的数据来训练传统模型是不可行的，由于本身该分类问题属于不太难的学习问题，只是用少量特征来学习大概率可行，接下来考虑使用降维方法对数据进行简化。
+\subsection{PCA降维}
+最简单的无监督降维是 PCA 方法，
+
 
 %-------------Uso de los entornos-------------%
 
@@ -189,9 +214,7 @@ Ejemplo para hacer referencia a una definición (teorema, corolario, etc), en la
 	Notación sin nombre ...
 \end{notacion}
 
-\begin{teorema}[(Nombre del teorema)][teo:1]
-	Sea $f$ ...
-\end{teorema}
+
 
 \begin{proof}
 	Prueba de teorema
@@ -247,9 +270,6 @@ Vocabulario sin nombre ...
 	Algoritmo con nombre ...
 \end{algoritmo}
 
-\begin{observacion}
-	Observación sin nombre ...
-\end{observacion}
 
 \begin{caja}[(Nombre de la caja)]
 Sea $f$ ...
