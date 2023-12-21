@@ -42,17 +42,16 @@ def check_nor(data_, labels):
 
         p_t = (np.arange(1, num_samples + 1) - 0.5) / num_samples
         chi_square_t = chi2.ppf(p_t, df=num_features)
+
         assert num_features == 100
-        # print('c', chi_square_t)
-        # print('bi', chi_square_t / mahalanobis_distances)
 
         a, b = i // 3, i % 3
         axs[a, b].scatter(sorted_distances, chi_square_t, label=f'Class {label}', color='blue', alpha=0.6,
                             marker='o')
         # 添加斜率为1的线
         axs[a, b].plot([0, sorted_distances[-1]], [0, sorted_distances[-1]], color='red', linestyle='--', label='Line')
-        axs[a, b].set_xlabel('Mahalanobis Distance')
-        axs[a, b].set_ylabel('Chi-Square Percentile')
+        axs[a, b].set_xlabel('马氏距离平方')
+        axs[a, b].set_ylabel('卡方分布分位数')
         axs[a, b].set_title(f'Class {label}')
         axs[a, b].legend()
         axs[a, b].grid(True)
