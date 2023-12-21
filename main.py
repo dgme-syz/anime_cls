@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
-from api.ml_models import check_cov
+from api.ml_models import *
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
@@ -52,11 +52,21 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
-    tr_X_array = np.array(tr_X)
-    te_X_array = np.array(te_X)
-    # check_nor(tr_X_array)
-    # check_nor(te_X_array)
-    check_cov(te_X_array)
+    tr_X = np.array(tr_X)
+    te_X = np.array(te_X)
+
+    ###
+    #  测试
+    def pca(train_X, train_y, test_X, test_y):
+        train_X, test_X = pca_method(train_X, test_X)
+        # step1 再次检查多重共线性
+        # check_cov(train_X)
+
+        #### 如下填写各个模型的测试信息
+
+        ####
+
+    pca(tr_X, tr_y, te_X, te_y)
     ###
 
 

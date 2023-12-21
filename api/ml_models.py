@@ -115,20 +115,20 @@ tr_X 是一个矩阵, tr_y 是一个 0-8 的数字, 表示标签
 """
 
 
-def pca_method(tr_X, te_X):
+def pca_method(tr_X, te_X, decompose=100):
     """
     输入: 训练集的特征 tr_X, 测试集的特征 te_X
     输出: 使用 pca 对于 tr_X 做降维(自行选择一个降维的合适维度) 
           然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
     """
     # 使用PCA对训练集进行降维
-    n_components = 10  # 自定义降维的合适维度
+    n_components = decompose  # 自定义降维的合适维度
     pca = PCA(n_components=n_components)
     tr_X_pca = pca.fit_transform(tr_X)
-
+    total_explained_variance_ratio = np.sum(pca.explained_variance_ratio_)
+    print(f"整体方差解释比例: {total_explained_variance_ratio}")
     # 使用训练好的PCA对测试集进行降维
     te_X_pca = pca.transform(te_X)
-
     return tr_X_pca, te_X_pca
 
 
