@@ -224,6 +224,12 @@ $$\hat{\beta} = (C^\top C)^{-1} C^\top Y$$
 最终的模型就是线性回归模型输出向量中分量最大值对应的下标为预测类别。
 
 \subsection{判别分析}
+\begin{figure*}
+	\centering
+	\includegraphics[width=0.96\textwidth]{./images/pic6}
+	\caption{取前3个类别的分布结果作展示，可以看到(马氏距离,卡方分布分位数)的点对并没有落在斜率为1的过远点的直线上，因此有理由拒绝原假设，即个总体不服从正态分布。}
+\end{figure*}
+
 判别分析也可以解决新样品的归属问题，因此可以使用判别分析解决分类问题，判别分析中我们考虑广义平方距离判别法以及贝叶斯判别法，判别分析首先假设样本属于正态分布，这需要我们检验数据是否近似满足 $9$ 元正态分布。
 
 
@@ -252,25 +258,40 @@ $$
 D^2(X,G_t) = d_t^2(X) + \ln |S_t| - 2\ln | q_t| 
 $$
 
-其中$q_t$ 对应于训练集的先验即，事实上当各个总体服从正态分布时，广义平方距离判别与贝叶斯判别一致，但是广义平方距离判别法适用范围更广。
+其中$q_t$ 对应于训练集的先验即训练集中各个类别出现的频率，$S_t$ 指的是第 $t$ 个总体的样本协方差阵，事实上当各个总体服从正态分布时，广义平方距离判别与贝叶斯判别一致，但是广义平方距离判别法适用范围更广。
  
 \subsubsection{其它分类器}
- 我们还考虑了 SVM，决策树传统学习模型，旨在通过多种分类器的测试，检验各种降维方法对于不同模型的具体效果，同时丰富我们的解决方案。
+我们还考虑了 SVM 和决策树等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
 
 \subsection{指标介绍}
-
+由于是多分类问题，并且数据集具有长尾性质，这就要求需要有多样的分类器评价指标来支撑实验的有效性，实验采用了以下指标
+\begin{nota}
+\begin{itemize}
+	\item Accuracy: 最常见的分类器性能评判指标
+	\item Micro-F1: 对于数据集中每个类单独计算 $\mathrm{TP}_i,\mathrm{FP}_i,\mathrm{FN}_i$，同时定义 $\mathrm{pre}_{mi}$以及$\mathrm{rec}_{mi}$，从而得到 Micro-F1:
+	\begin{align}
+		&\mathrm{pre}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FP}_i}\notag\\
+		&\mathrm{rec}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FN}_i}\notag\\
+		&\mathrm{F1}_{mi} = \frac{2\times \mathrm{pre}_{mi}\times \mathrm{rec}_{mi}}{\mathrm{pre}_{mi} + \mathrm{rec}_{mi}}\notag
+	\end{align}
+	该指标会受到数量较多的类别影响较大。
+	\item Macro-F1: 不同于 Micro-F1，定义 $\mathrm{pre}_{ma}$为各个类别精度(precision)的算术平均值，$\mathrm{rec}_{ma}$ 为各个类别召回率(recall)的算术平均值，得到 Macro-F1 为:
+	$$
+	\mathrm{F1}_{ma} = \frac{2 \times \mathrm{pre}_{ma} \times \mathrm{rec}_{ma}}{\mathrm{pre}_{ma} + \mathrm{rec}_{ma}}
+	$$
+	\item Geometric-acc:所有类别accuracy的算术平均值
+	\item Harmonic-acc:所有类别accuracy的调和平均值，由于调和平均对于较小的值有很大的惩罚，因此该项指标可以适于检测长尾学习里分类器的性能
+	\item Lowest Recall: 所有类别召回率的最小值
+\end{itemize}
+\end{nota}
 \subsection{PCA降维}
-最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：
+最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$
 
-\begin{lema}
-$$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$$
-\end{lema}
-
-为了搜索到一个合适的主成分个数，我们取了一个离散集合 $\{10,50,100,200,500\}$，绘制了 Figure 3来展示这种变化的趋势，由 $50,100,200,500$ 自变量以 2 倍变化，因变量等差变化，可知实际上因变量实际上大致以 $\log_2$ 的趋势变化，在计算机计算速度(尤其是 SVM 运行有点慢了)与保留主成分个数的权衡后，我们选择使用 100 个主成分继续实验。
+为了搜索到一个合适的主成分个数，我们取了一个离散集合 $\{10,50,100,200,500\}$，绘制了 Figure 4来展示这种变化的趋势，由 $50,100,200,500$ 自变量以 2 倍变化，因变量等差变化，可知实际上因变量实际上大致以 $\log_2$ 的趋势变化，在计算机计算速度(尤其是 SVM 运行有点慢了)与保留主成分个数的权衡后，我们选择使用 100 个主成分继续实验。
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=0.065]{./images/pic4}
+	\includegraphics[scale=0.06]{./images/pic4}
 	\caption{PCA解释方差比}
 \end{figure}
 
