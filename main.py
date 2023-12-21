@@ -49,23 +49,9 @@ def ml():
     tr_X, tr_y = train_data.ml_data()
     te_X, te_y = test_data.ml_data()
 
-    # scaler = StandardScaler()
-
-    # tr_X = scaler.fit_transform(tr_X)
-    # te_X = scaler.transform(te_X)
-
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
 
-    #  测试
-    def pca(train_X, train_y, test_X, test_y):
-        train_X, test_X = pca_method(train_X, test_X)
-        check_nor(train_X, train_y)
-
-        #### 如下填写各个模型的测试信息
-
-        ####
-    # pca(tr_X, tr_y, te_X, te_y)
     def dl_decompose1(train_X, train_y, test_X, test_y):
         net = Net()
         net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt"), \
@@ -80,8 +66,22 @@ def ml():
             return net.dense1(net.f(new_x)).detach().numpy()
         train_X, test_X = convert(train_X), convert(test_X)
         assert train_X.shape[1] == 100
+    dl_decompose1(tr_X, tr_y, te_X, te_y)
+
+    #  测试
+    scaler = StandardScaler()
+
+    tr_X = scaler.fit_transform(tr_X)
+    te_X = scaler.transform(te_X)
+
+    def pca(train_X, train_y, test_X, test_y):
+        train_X, test_X = pca_method(train_X, test_X)
         check_nor(train_X, train_y)
-    # dl_decompose1(tr_X, tr_y, te_X, te_y)
+
+        #### 如下填写各个模型的测试信息
+
+        ####
+    # pca(tr_X, tr_y, te_X, te_y)
 
     def flda(train_X, train_y, test_X, test_y):
         train_X, test_X = flda_method(train_X, test_X)
