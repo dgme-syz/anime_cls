@@ -49,13 +49,11 @@ def ml():
     tr_X, tr_y = train_data.ml_data()
     te_X, te_y = test_data.ml_data()
 
-    scaler = StandardScaler()
+    # scaler = StandardScaler()
 
-    tr_X = scaler.fit_transform(tr_X)
-    te_X = scaler.transform(te_X)
+    # tr_X = scaler.fit_transform(tr_X)
+    # te_X = scaler.transform(te_X)
 
-    tr_X_array = np.array(tr_X)
-    te_X_array = np.array(te_X)
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
 
@@ -70,33 +68,20 @@ def ml():
     # pca(tr_X, tr_y, te_X, te_y)
     def dl_decompose1(train_X, train_y, test_X, test_y):
         net = Net()
-        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt")))
-        def convert(data_):
-            return net.dense1(torch.tensor(data_, dtype=torch.float32).unsqueeze(0))[0].detach().numpy()
+        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt"), \
+                                map_location=device))
+        def convert(x):
+            w, h = x.shape
+            new_x = []
+            for i in range(w):
+                new_x.append(x[i].reshape((3, 32, 32)))
+            new_x = torch.tensor(np.array(new_x), dtype=torch.float32)
+            print(new_x.shape)
+            return net.dense1(net.f(new_x)).detach().numpy()
         train_X, test_X = convert(train_X), convert(test_X)
         assert train_X.shape[1] == 100
         check_nor(train_X, train_y)
     # dl_decompose1(tr_X, tr_y, te_X, te_y)
-
-
-    def dl_decompose2(train_X, train_y, test_X, test_y):
-        net = ResNet18(9)
-        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "Resnet.pt")))
-        def convert(x):
-            x = torch.tensor(x).unsqueeze(0)
-            x = net.conv1(x)
-            x = net.bn1(x)
-            x = net.relu(x)
-            x = net.maxpool(x)
-
-            x = net.layer1(x)
-            x = net.layer2(x)
-            x = net.layer3(x)
-            x = net.layer4(x)
-
-            x = net.avgpool(x)
-            x = torch.flatten(x, 1)
-            return x[0].detach().numpy()
 
     def flda(train_X, train_y, test_X, test_y):
         train_X, test_X = flda_method(train_X, test_X)
@@ -105,8 +90,8 @@ def ml():
 
 
 if __name__ == '__main__':
-    dl()
-    # ml()
+    # dl()
+    ml()
 
 
 
