@@ -29,37 +29,33 @@ def check_nor(data_, labels):
     for i, label in enumerate(unique_labels):
         data_class = data_[labels == label]
         num_samples, num_features = data_class.shape
-        print(data_class[0].shape)
-        mean_vector = np.mean(data_class, axis=0)
-        cov_matrix = np.cov(data_class, rowvar=False)
-        mahalanobis_distances = np.array(
-            [np.sqrt(np.dot(np.dot((x - mean_vector).T, np.linalg.inv(cov_matrix)), (x - mean_vector))) for x in
-             data_class])
+        # print(data_class[0].shape)
+        mean_vector = np.mean(data_class, axis=0).reshape(-1, 1)
+        cov_matrix_inv = np.linalg.inv(np.cov(data_class, rowvar=False))
+        mahalanobis_distances = []
+        for x in data_class:
+            x = x.reshape(-1, 1)
+            val = (x - mean_vector).T @ cov_matrix_inv @ (x - mean_vector)
+            mahalanobis_distances.append(val[0][0])
         print('m', mahalanobis_distances)
-        sorted_distances_indices = np.argsort(mahalanobis_distances)
-        sorted_distances = mahalanobis_distances[sorted_distances_indices]
+        sorted_distances = sorted(mahalanobis_distances)
 
         p_t = (np.arange(1, num_samples + 1) - 0.5) / num_samples
         chi_square_t = chi2.ppf(p_t, df=num_features)
-        print('c', chi_square_t)
-        print('bi', chi_square_t/mahalanobis_distances)
+        assert num_features == 100
+        # print('c', chi_square_t)
+        # print('bi', chi_square_t / mahalanobis_distances)
 
-        for i in range(3):  # 假设你有3行
-            for j in range(3):  # 假设你有3列
-                label = 3 * i + j  # 计算类别标签（假设每行有3个子图）
-                # 假设你有 sorted_distances 和 chi_square_t 数据
-                axs[i, j].scatter(sorted_distances, chi_square_t, label=f'Class {label}', color='blue', alpha=0.6,
-                                  marker='o')
-
-                # 添加斜率为1的线
-                axs[i, j].plot(sorted_distances, sorted_distances, color='red', linestyle='--', label='Slope 1 Line')
-
-                axs[i, j].set_xlabel('Mahalanobis Distance')
-                axs[i, j].set_ylabel('Chi-Square Percentile')
-                axs[i, j].set_title(f'Class {label}')
-                axs[i, j].legend()
-                axs[i, j].grid(True)
-
+        a, b = i // 3, i % 3
+        axs[a, b].scatter(sorted_distances, chi_square_t, label=f'Class {label}', color='blue', alpha=0.6,
+                            marker='o')
+        # 添加斜率为1的线
+        axs[a, b].plot([0, sorted_distances[-1]], [0, sorted_distances[-1]], color='red', linestyle='--', label='Line')
+        axs[a, b].set_xlabel('Mahalanobis Distance')
+        axs[a, b].set_ylabel('Chi-Square Percentile')
+        axs[a, b].set_title(f'Class {label}')
+        axs[a, b].legend()
+        axs[a, b].grid(True)
     plt.tight_layout()
     plt.show()
 

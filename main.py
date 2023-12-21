@@ -54,38 +54,21 @@ def ml():
     tr_X = scaler.fit_transform(tr_X)
     te_X = scaler.transform(te_X)
 
+    tr_X_array = np.array(tr_X)
+    te_X_array = np.array(te_X)
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
 
-    tr_X_array = np.array(tr_X)
-    te_X_array = np.array(te_X)
-    # check_nor(tr_X_array)
-    start_time = time.time()
-    check_nor(te_X_array, te_y)
-    end_time = time.time()
-    print(end_time-start_time)
-    # check_dif(te_X_array, te_y)
-
-    tr_X = np.array(tr_X)
-    te_X = np.array(te_X)
-    tr_X, te_X = pca_method(tr_X, te_X)
-
-
-    ###
-
-    ###
     #  测试
     def pca(train_X, train_y, test_X, test_y):
         train_X, test_X = pca_method(train_X, test_X)
-        # step1 再次检查多重共线性
-        # check_cov(train_X)
+        check_nor(train_X, train_y)
 
         #### 如下填写各个模型的测试信息
 
         ####
 
     pca(tr_X, tr_y, te_X, te_y)
-
     ###
 
 
