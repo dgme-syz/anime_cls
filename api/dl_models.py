@@ -185,6 +185,6 @@ def train(net, train_iter, test_iter, loss, num_epochs, updater, device):
         save_model(net, epoch + 1, mat.acc())
 
 if __name__ == '__main__':
-    model = Net()
+    model = ResNet18(9)
     # 打印模型结构
     print(model)

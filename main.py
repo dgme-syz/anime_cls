@@ -32,7 +32,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = Net().to(device)
+    net = ResNet18(9).to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -68,7 +68,7 @@ def ml():
 
         ####
     # pca(tr_X, tr_y, te_X, te_y)
-    def dl_decompose(train_X, train_y, test_X, test_y):
+    def dl_decompose1(train_X, train_y, test_X, test_y):
         net = Net()
         net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt")))
         def convert(data_):
@@ -76,7 +76,27 @@ def ml():
         train_X, test_X = convert(train_X), convert(test_X)
         assert train_X.shape[1] == 100
         check_nor(train_X, train_y)
-    # dl_decompose(tr_X, tr_y, te_X, te_y)
+    # dl_decompose1(tr_X, tr_y, te_X, te_y)
+
+
+    def dl_decompose2(train_X, train_y, test_X, test_y):
+        net = ResNet18(9)
+        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "Resnet.pt")))
+        def convert(x):
+            x = torch.tensor(x).unsqueeze(0)
+            x = net.conv1(x)
+            x = net.bn1(x)
+            x = net.relu(x)
+            x = net.maxpool(x)
+
+            x = net.layer1(x)
+            x = net.layer2(x)
+            x = net.layer3(x)
+            x = net.layer4(x)
+
+            x = net.avgpool(x)
+            x = torch.flatten(x, 1)
+            return x[0].detach().numpy()
 
     def flda(train_X, train_y, test_X, test_y):
         train_X, test_X = flda_method(train_X, test_X)
@@ -85,8 +105,8 @@ def ml():
 
 
 if __name__ == '__main__':
-    # dl()
-    ml()
+    dl()
+    # ml()
 
 
 
