@@ -1,4 +1,6 @@
 import os, torch
+import time
+
 import numpy as np
 import torch.nn as nn
 from torch.optim import Adam
@@ -32,7 +34,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = ResNet18(9).to(device)
+    net = Net(decompose=2).to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -754,6 +756,14 @@ def ml():
 
         # step1 再次检查多重共线性
         # check_cov(train_X)
+    # dl_decompose1(tr_X, tr_y, te_X, te_y)
+
+    #  测试
+    # scaler = StandardScaler()
+
+    # tr_X = scaler.fit_transform(tr_X)
+    # te_X = scaler.transform(te_X)
+
 
         # 如下填写各个模型的测试信息
         variables['dtree_acc'], variables['dtree_time'], variables['dtree_mif'], variables['dtree_maf'], variables['dtree_mrc'], \
@@ -851,12 +861,26 @@ def ml():
         print(output)
         output = "在神经网络降维至{}维下，QDA的类准确率调和平均值为:{}".format(100, variables['qda_hm'])
         print(output)
-
+    return train_X
     # pca(tr_X, tr_y, te_X, te_y)
     flda(tr_X, tr_y, te_X, te_y)
     # dl_decompose1(tr_X, tr_y, te_X, te_y)
 
+    def flda(train_X, train_y, test_X, test_y):
+        train_X, test_X = flda_method(train_X, test_X)
+    # flda(tr_X, tr_y, te_X, te_y)
 
+    def decompose_visulaize(train_X, train_y):
+        nn_X = dl_decompose1(train_X, train_y, train_X, train_y, 2, os.path.join(base_dir, \
+                    "api", "Trained", "decompose=2.pt"))
+        scaler = StandardScaler()
+        train_X = scaler.fit_transform(train_X)
+        pca_X, _ = pca_method(train_X, np.zeros((1, train_X.shape[1])), 2)
+        flda_X, _ = flda_method(train_X, train_y, np.zeros((1, train_X.shape[1])), 2)
+        TwoScatter(pca_X, train_y, "pca1")
+        TwoScatter(flda_X, train_y, "flda1")
+        TwoScatter(nn_X, train_y, "nn1")
+    decompose_visulaize(tr_X, tr_y)
     ###
 
 

@@ -93,7 +93,7 @@
 
 
 \begin{keywords}
-	\textcolor{azulTitulos}{图像分类\ 降维 \ 判别 \ 多因变变量线性回归 \ 假设检验}
+	\bfseries{\textcolor{azulTitulos}{图像分类\ 降维 \ 判别 \ 多因变变量线性回归 \ 假设检验\ SVM \ 决策树 \ KNN }}
 \end{keywords}
 
 \section{介绍}
@@ -148,7 +148,7 @@ $$
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=0.13]{./images/pic1}
+	\includegraphics[scale=0.56]{./images/pic1}
 	\caption{各类别训练集与测试集的分类情况，横轴为类别对应的样本数目，且采用对数刻度}
 \end{figure}
 
@@ -165,11 +165,11 @@ $$
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=0.33]{./images/pic3}
-	\caption{频率直方图，已经将纵坐标处理为 $\log$ 尺度}
+	\includegraphics[scale=0.38]{./images/pic3}
+	\caption{频率直方图}
 \end{figure}
 
-计算得到有多达 136496 对特征具有 $\geq 0.7$ 的相关性(情理之中)，之后的进一步工作可以尝试使用降维方法减少多重共线性，那时再做进一步分析。
+计算得到有多达 280930 对特征具有 $\geq 0.7$ 的相关性(情理之中)，之后的进一步工作可以尝试使用降维方法减少多重共线性，那时再做进一步分析。
 
 
 \section{降维}
@@ -233,7 +233,7 @@ $$\hat{\beta} = (C^\top C)^{-1} C^\top Y$$
 判别分析也可以解决新样品的归属问题，因此可以使用判别分析解决分类问题，判别分析中我们考虑广义平方距离判别法以及贝叶斯判别法，判别分析首先假设样本属于正态分布，这需要我们检验数据是否近似满足 $9$ 元正态分布。
 
 
-一个简单的方式是，当原假设 $H_0:X\sim N_M(\mu,\Sigma)$ 成立时，数据总体 $X$ 具有如下性质：
+一个简单的方式\cite{2}是，当原假设 $H_0:X\sim N_M(\mu,\Sigma)$ 成立时，数据总体 $X$ 具有如下性质：
 
 \begin{lema}
 	$$D^2 = (X - \mu)^\top \Sigma^{-1} (X - \mu) \sim \chi^2(M)$$
@@ -261,14 +261,13 @@ $$
 其中$q_t$ 对应于训练集的先验即训练集中各个类别出现的频率，$S_t$ 指的是第 $t$ 个总体的样本协方差阵，事实上当各个总体服从正态分布时，广义平方距离判别与贝叶斯判别一致，但是广义平方距离判别法适用范围更广。
  
 \subsubsection{其它分类器}
-我们还考虑了 SVM 和决策树等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
+我们还考虑了KNN(邻居数=5)， SVM(传统学习方法中分类问题必不可少的登场角色)\cite{4} 和决策树(model-free的分类器的代表)等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
 
 \subsection{指标介绍}
 由于是多分类问题，并且数据集具有长尾性质，这就要求需要有多样的分类器评价指标来支撑实验的有效性，实验采用了以下指标
-\begin{nota}
 \begin{itemize}
 	\item Accuracy: 最常见的分类器性能评判指标
-	\item Micro-F1: 对于数据集中每个类单独计算 $\mathrm{TP}_i,\mathrm{FP}_i,\mathrm{FN}_i$，同时定义 $\mathrm{pre}_{mi}$以及$\mathrm{rec}_{mi}$，从而得到 Micro-F1:
+	\item Micro-F1(等同于Accuracy): 对于数据集中每个类单独计算 $\mathrm{TP}_i,\mathrm{FP}_i,\mathrm{FN}_i$，同时定义 $\mathrm{pre}_{mi}$以及$\mathrm{rec}_{mi}$，从而得到 Micro-F1:
 	\begin{align}
 		&\mathrm{pre}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FP}_i}\notag\\
 		&\mathrm{rec}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FN}_i}\notag\\
@@ -283,9 +282,8 @@ $$
 	\item Harmonic-acc:所有类别accuracy的调和平均值，由于调和平均对于较小的值有很大的惩罚，因此该项指标可以适于检测长尾学习里分类器的性能
 	\item Lowest Recall: 所有类别召回率的最小值
 \end{itemize}
-\end{nota}
 \subsection{PCA降维}
-最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$
+最简单的无监督降维是 PCA 方法\cite{3}，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$
 
 为了搜索到一个合适的主成分个数，我们取了一个离散集合 $\{10,50,100,200,500\}$，绘制了 Figure 4来展示这种变化的趋势，由 $50,100,200,500$ 自变量以 2 倍变化，因变量等差变化，可知实际上因变量实际上大致以 $\log_2$ 的趋势变化，在计算机计算速度(尤其是 SVM 运行有点慢了)与保留主成分个数的权衡后，我们选择使用 100 个主成分继续实验。
 
@@ -319,241 +317,167 @@ $$
 			批次大小    & 256  \\ 
 			优化器  & Adam\\ 
 			学习率 & 0.001\\ 
-			损失函数  & 多元交叉熵 \\  \bottomrule
+			损失函数  & 多元交叉熵 \\  
+			激活函数 & Relu \\ \bottomrule
 		\end{tabular}
-		\label{tabla:nombre}
 	\end{minipage}
 \end{table}
 
-
-\begin{definicion}[(Nombre de la definición)]
-	Sea $f$ ...
-\end{definicion}
-
-\begin{definicion}[][def:dos]
-Definición sin nombre ...
-\end{definicion}
-
-Ejemplo para hacer referencia a una definición (teorema, corolario, etc), en la definición \ref{def:dos}.
-
-\begin{notacion}
-	Notación sin nombre ...
-\end{notacion}
-
-
-
-\begin{proof}
-	Prueba de teorema
-\end{proof}
-
-\begin{teorema}
-Teorema sin nombre ...
-\end{teorema}
-
-En el teorema \ref{teo:1}
-
-\begin{ejemplo}[(Nombre del ejemplo)]
-	Sea $f$ ...
-\end{ejemplo}
-
-\begin{ejemplo}
-	Ejemplo sin nombre ...
-\end{ejemplo}
-
-\begin{corolario}[(Nombre del corolario)]
-	Sea $f$ ...
-\end{corolario}
-
-\begin{corolario}
-Corolario sin nombre ...
-\end{corolario}
-
-\begin{lema}[(Nombre del lema)]
-Sea $f$ ...
-\end{lema}
-
-\begin{lema}
-Lema si nombre ...
-\end{lema}
-
-\begin{nota}[(Nombre de la nota)]
-Sea $f$ ...
-\end{nota}
-
-\begin{nota}
-Nota sin nombre ...
-\end{nota}
-
-\begin{vocabulario}[(Nombre del vocabulario)]
-Sea $f$ ...
-\end{vocabulario}
-
-\begin{vocabulario}
-Vocabulario sin nombre ...
-\end{vocabulario}
-
-\begin{algoritmo}[(Nombre del algoritmo)]
-	Algoritmo con nombre ...
-\end{algoritmo}
-
-
-\begin{caja}[(Nombre de la caja)]
-Sea $f$ ...
-\end{caja}
-
-\begin{scaja}
-Scaja sin nombre ...
-\end{scaja}
-
-%--------------Uso de figuras y subfiguras--------------%
-
-\begin{figure}[ht!!!]
+\begin{figure*}
 	\centering
-	\begin{minipage}{0.7\textwidth}
-		\centering
-		\includegraphics[scale=0.2]{images/bowl}
-		\caption{Título de la figura. Decir si es elaboración propia o poner referencia.}
-		\label{fig:nombre}
-	\end{minipage}
-\end{figure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/pca1.png}
+		\caption{PCA}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/flda1.png}
+		\caption{FLDA}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/nn1.png}
+		\caption{NN}
+	\end{subfigure}
+	\caption{降维效果展示，其中 NN 的第一层降维至2维}
+\end{figure*}
+\subsection{初步降维结果分析}
 
-Note cómo en la Figura \ref{fig:nombre} ...
 
-\begin{figure}[ht!!!]
+首先为了很好地直观展示三者降维的效果，我们将原始数据降至2维，绘制它们的散点图及KDE曲\cite{5}(参考 Figure5)。
+
+对于PCA，能够看出类7和类8峰值区域，具有明显的差异，意味着PCA能够很好的分开两个类，事实上类7(Rize)与类8(Sharo)在训练集有9052，6445条数据，Rize是紫发紫瞳女生，Sharo是金发碧眼女生，从颜色上就可以有很好地区分；类8(Sharo)与类0(Blue mountain)的头发颜色都属于偏黄的类型，大概率前 2 个主成分只提取了整体特征，一些眼睛颜色以及更细节的特征(脸形应该不算在内，二次元人物脸形都是类似的)，同样深紫色的Rize(类7)，棕色的Chiya(类2)，深蓝色的Maya(类4)，颜色差异性也不是很大，因此在PCA的KDE曲线中这3个类别的峰值区域几乎重合。可以得出结论，PCA最先感知到的是图像的整体特征。
+
+对于FLDA，尽管将3072维降至2维，FLDA以其极具针对性的目标优化，使得其无论在第一个降维特征，还是第二个降维特征下，每个类别的峰值区域有了较大的差异，或许使用一个不经 learning 的普通学习器也能发挥很好的分类性能。这也暗示了，FLDA具有很强的针对性压缩功能(但是这里无法看出泛化性能，因此还需更深入的工作)，大概率可以估计 FLDA + KNN 实际生活中应用非常广泛。
+
+神经网络降维有点大失所望，也许是梯度下降只能搜到局部最优，也许是其层与层之间还有着一些联系，导致各类别 KDE 密度曲线的峰值区域大部分重合。有可能是全连接层输出维度较低，使得其难以构建准确的像素特征，我们似乎很难解释它究竟干了什么。但是，我们仍可以将其纳入接下来任务考虑的一环，毕竟我们并不需要数据降维至2维，100维即可满足大多数情况下的需求，因此接下来，我们会采用隐层100个神经元的神经网络构建分类器。
+
+\subsection{降维方法与分类器}
+
+
+\begin{table*}[ht!!!]
 	\centering
-	\begin{minipage}{0.7\textwidth}
-		\centering
-		\begin{subfigure}{0.47\textwidth}
-			\centering
-			\includegraphics[scale=0.1]{images/bowl}
-			\caption{Subfigura 1}
-			\label{subfig:1}
-		\end{subfigure}
-		\begin{subfigure}{0.47\textwidth}
-			\centering
-			\includegraphics[scale=0.1]{images/bowl}
-			\caption{Subfigura 2}
-			\label{subfig:2}
-		\end{subfigure}
-		\caption{ Título para la figura en general. Decir si es elaboración propia o poner referencia.}
-		\label{fig:2}
-	\end{minipage}
-\end{figure}
-
-En la Figura \ref{fig:2}, en la subfigura \ref{subfig:2} se observa que ...
-
-%-----------Uso de tablas---------------%
-% Los colores se utilizan sólo como muestra de utilización pero se deben evitar
-
-Puede observar en la Tabla \ref{tabla:nombre} ...
-
-\begin{table}[ht!!!]
-	\centering
-	\begin{minipage}{0.7\textwidth}
-	\caption{Título de la Tabla. Decir si es elaboración propia o poner referencia.}
-	\centering
-	\begin{tabular}{*5l}    \toprule
-		\emph{name} & \emph{foo} & & &  \\ \midrule
-		Models    & A  & B  & C  & D  \\ 
-		Model $X$ & X1 & X2 & X3 & X4\\ 
-		Model $Y$ & Y1 & Y2 & Y3 & Y4\\ \bottomrule
+	\vspace{0pt}
+	\begin{tabular}{*6l}    \toprule
+		Method & Accuracy & Macro-F1 & Least Recall&Geometric-acc & Harmonic-acc \\ \midrule
+		决策树 + PCA&0.640&0.432&0.102 &0.445&0.305\\
+		KNN + PCA & 0.760 & 0.560 & 0.136 & 0.551 & 0.362\\
+		SVM + PCA & 0.875 & 0.753 & 0.352 & 0.742 & 0.660\\
+		QDA + PCA & 0.859 & 0.676 & 0.024 & 0.674 & 0.164\\
+		多因变量线性回归 + PCA&0.788&0.548&0.000&0.537&0.000\\
+		\midrule
+		决策树 +FLDA & 0.791 & 0.645 & 0.364 & 0.673 & 0.613\\
+		KNN + FLDA &{0.880} & 0.747 & {0.420} & 0.758 & 0.700\\
+		SVM + FLDA & 0.877 & 0.750 & {0.409} & 0.756 & 0.696\\
+		QDA + FLDA &0.866 & 0.736 & 0.409 & {0.775} & \textcolor{azulTitulos}{\textbf{0.730}} \\
+		多因变量线性回归 + FLDA &0.823 & 0.637 & 0.081 & 0.611 & 0.295 \\
+		\midrule
+		决策树+NN&0.827 & 0.690 &\textcolor{azulTitulos}{\textbf{ 0.455}} & 0.719 & 0.684\\
+		KNN+ NN&0.871 & {0.756} & 0.409 & 0.766 & 0.711\\
+		SVM + NN&\textcolor{azulTitulos}{\textbf{0.888}} & \textcolor{azulTitulos}{\textbf{0.778}} & 0.341 & \textcolor{azulTitulos}{\textbf{0.780}} & 0.699\\
+		QDA + NN&0.678 & 0.525 & 0.267 & 0.584 & 0.468\\
+		多因变量线性回归 + NN&0.824 & 0.603 & 0.000 & 0.595 & 0.000\\
+		\bottomrule
 	\end{tabular}
-	\label{tabla:nombre}
-	\end{minipage}
-\end{table}
+	\caption{效果比对图}
+\end{table*}
 
-%--------------Uso de ecuaciones numeradas y no numeradas-----------%
+\section{比较分析}
+接下来，我们将具体观察三种降维度方法对于分类模型的效果对比，首先观察 Table 1。
 
-Ecuación numerada:
-\begin{equation}
-	x=\frac{b\pm \sqrt{b^2-4ac}}{2a}
-	\label{eqn:formulaGeneral}
-\end{equation}
-En la fórmula \ref{eqn:formulaGeneral} ...
+\subsection{降维方法}
 
-Ecuación no numerada:
-\begin{equation*}
-	x=\frac{b\pm \sqrt{b^2-4ac}}{2a}
-\end{equation*}
+FLDA降维是使用的所有降维方法中最好的，适用于方案中所有分类器，不仅如此，缓解了长尾数据集带来的影响，这可以从 Least Recall 以及 Harmonic-acc 看得很明显，如果一旦某个类别的分类准确度较低，那么Harmonic-acc将大幅减少：
+\begin{nota}
+	$$
+	\frac{2 \times 0.5 \times 0.5}{0.5 + 0.5} = 0.5 \quad \frac{2 \times 0.1 \times 0.9}{ 0.1 + 0.9} = 0.18
+	$$
+	即Harmonic-acc对较小的 acc 给予更大的惩罚。
+\end{nota}
+然后 PCA 整体表现一般，无论在哪个分类器上都落后于同为线性降维的 FLDA，但是PC维度上选择具有灵活性，因此可以尝试对于不同降维维度做进一步分析。
 
-Ecuación alineada numerada:
-\begin{align}
-	x & = a^2-b^2 \label{eqn:2}\\
-	& = (a-b)(a+b) \label{eqn:3}
-\end{align}
-En las expresiones \ref{eqn:2} y \ref{eqn:3} ...
+神经网络特征层降维对于各种分类器的性能有所提升，与 PCA 有类似之处，性能好于 PCA，与FLDA效果差不多。可见这种奇怪的降维方式在维度足够的情况下，的确能加入对于标签的考虑(基于损失函数的梯度优化)。另一种神经网络降维方式时自编码器(Auto-Encoder)，这次实验最大的遗憾或许就在此，在实验的最后阶段，我们才得知 AutoEncoder(AE)\cite{1} 的存在，想要用 AE 来丰富降维工具，但是事实上 AE 的架构某种视角下其实是 PCA 的非线性版本，也许更能丰富我们对于无监督降维的理解。
 
-Ecuación alineada no numerada:
-\begin{align*}
-	x & = a^2-b^2 \\
-	& = (a-b)(a+b)
-\end{align*}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.38]{./images/pic7}
+	\caption{AutoEncoder}
+\end{figure}
 
-% Para hacer ecuaciones centradas sin numeración también se pueden hacer con \[ \], preferir siempre estas formas sobre $$ $$
-Ecuación centrada \[ a^2=b^2+c^2 \]
+\begin{figure*}
+	\centering
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/G1}
+		\caption{}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/G2}
+		\caption{}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/G3}
+		\caption{}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/G4}
+		\caption{}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/G5}
+		\caption{}
+	\end{subfigure}
+	\caption{对PCA的5个具有代表的主成分个数值设置实验，上面5张图代表了解决方案中的5个分类器，每张图，当主成分个数变化时，分类器的各项性能变化的折线图。}
+\end{figure*}
 
-% Se ejemplifica la introducción de código en Java
+\subsection{分类器}
 
-Ejemplo de código Java:
+综合 Figure 7 与 Table 1，下文 QDA 即广义平法距离法，我们可以有一下分析:
 
-\begin{lstlisting}
-	/**
-	* This is a doc comment.
-	*/
-	package com.ociweb.jnb.lombok;
-	
-	import java.util.Date;
-	import lombok.Data;
-	import lombok.EqualsAndHashCode;
-	import lombok.NonNull;
-	
-	$$@Data
-	$$@EqualsAndHashCode(exclude={"address","city","state","zip"})
-	public class Person {
-		enum Gender { Male, Female }
-		
-		// another comment
-		
-		%%@NonNull%% private String firstName;
-		%%@NonNull%% private String lastName;
-		%%@NonNull%% private final Gender gender;
-		%%@NonNull%% private final Date dateOfBirth;
-		
-		private String ssn;
-		private String address;
-		private String city;
-		private String state;
-		private String zip;
-	}
-\end{lstlisting}
+\textcolor{azulTitulos}{\bfseries 决策树\ KNN\ QDA} 可以看到，当 PCA 主成分个数在 \{10, 50, 100, 200, 500\} 内变动，这些不需要参数进行学习的方法几乎不受影响，而且变化没有规律性。相比之下，FLDA提取到了更有针对性的特征，这些非参数模型的效果都上升了10个百分点;KNN 在神经网络降维里也表现得很优秀。
 
-Este es código en la misma línea \lstinline|import java.util.Date;|, el símbolo | es sólo un delimitador y se puede cambiar por algún otro que no se utilice en el código.
+KNN，QDA在该问题展现了非常好的性能，最终的方案里将考虑这两个分类器。
 
+\textcolor{azulTitulos}{\bfseries 多因变量线性回归} 由于测试集和训练集类别 0 和类别 6 出现次数都较少(可以从其混淆矩矩阵观察得出)，加之维数较低时 PCA 降维无法提供有效的特征，其分类性能较差，随着选择主成分数量增多，性能有所提升。
+\begin{figure}[ht!!!]
+	\centering
+	\includegraphics[scale=0.42]{./images/pic8}
+	\caption{主成分个数=100时多因变量线性回归的混淆矩阵，注意类别0，6出现缺失}
+\end{figure}
 
-%---------------Uso y definición de la bibliografía---------------%
-% Poner sólo las referencias bibliográficas, es decir, sólo las que se hayan utilizado en el artículo y revisar que las direcciones web funcionen correctamente
+同时，注意到多因变量线性回归在神经网络降维上表现最优，事实上神经网络线性层的工作就是将100维度的数据映射至 9维，这本质上就是一个多因变量线性回归任务，线性层的工作与现在的模型的工作相契合，所以使用多因变量的线性回归充当NN的分类器效果较好，这与之前的预想相吻合。
 
-% En el caso de utilizar el ambiente thebibliography
-Esta es una cita de la bibliografía: \cite{H}
+\textcolor{azulTitulos}{\bfseries SVM} 作为传统学习分类模型的最强者，当主成分个数达到50，Accuracy就已经达到 86.9\%；主成分个数为100时，达到了87.5\%，已然是该问题最好的分类器之一，这符合预期，并提供了一个较好的上界。
 
-La bibliografía se prefiere según APA con utilizando biblatex con Biber, también aceptamos el formato IEEE.
+\section{总结}
 
-% En el caso de utilizar biber
-%Esta es una cita de la bibliografía: \parencite{H}
+经过以上工作的筛选，剩下值得考虑的5个方案，分别是 KNN + FLDA，SVM + FLDA， QDA + FLDA，KNN + NN，SVM + NN，这其中 NN 方案旨在启发思考，不过由于我们的模型文件似乎只有 1mb 左右(见 api/Trained/base.pt)，实际部署也可以考虑，但是优先度肯定没有 FLDA 降维方法高. KNN + FLDA 与 QDA(广义平法距离判别法) + FLDA 都是部署起来较简单的方法，因此它们时最后的该分类问题的解决方案。
 
-% Quitar el comentario de la siguiente línea si se utilizará biber para generar la bibliografía y quitar todo el ambiente thebibliography
-%\printbibliography[heading=bibnumbered]
+本次实验，还尝试利于神经网络Decoder-Encoder架构的Decoder降维，效果不错，不过可以考虑之后我们小组学习研究一下自编码器降维。
+
+在进行本实验前，我们采用过 ResNet18 进行过图像分类，在测试集上达到了 92\% 的 Accuracy，最后是简单的模型以及SVM(理应是)胜出，违反预期的是多因变量的线性回归，本以为它类似神经网络的线性层，可以和普通的两层隐层网络的效果一致(测试集Accuracy达到90\%)，也许是标准 softmax 才能实现这种效果。
 
 \begin{thebibliography}{AAAAA}
-	\bibitem{H} Cita H
+	\bibitem{1} Umberto Michelucci,
+	An Introduction to Autoencoders,
+	CoRR,
+	vol. abs/2201.03898,
+	2022,
+	\url{https://arxiv.org/abs/2201.03898}.
+	\bibitem{2}
+	高惠璇. 应用多元统计分析. 北京大学出版社, 2005.
+	\bibitem{3}
+	Svante Wold, Kim Esbensen, Paul Geladi.
+	Principal component analysis.
+	Chemometrics and Intelligent Laboratory Systems, 2(1-3): 37-52, 1987.
+	Elsevier.
+	\bibitem{4}
+	Marti A. Hearst, Susan T. Dumais, Edgar Osuna, John Platt, Bernhard Scholkopf.
+	Support vector machines.
+	IEEE Intelligent Systems and Their Applications, 13(4): 18-28, 1998.
+	IEEE.
+	\bibitem{5} Khosrow Dehnad, Density estimation for statistics and data analysis, Taylor \& Francis, 1987.
+	
+	
 \end{thebibliography}
 
-% Inicia la sección de apéndices
-\appendix
-
-\section{Apéndice}
-
-Apéndice
 
 \end{document}
 
