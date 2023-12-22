@@ -1,6 +1,6 @@
-import os, torch
+import os
 import time
-
+import torch
 import numpy as np
 import torch.nn as nn
 from torch.optim import Adam
@@ -12,16 +12,13 @@ from api.dl_models import Net, train, ResNet18, KNet
 from api.ml_models import *
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya", \
-        "Megumi", "Mocha", "Rize", "Sharo"]
+names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya",
+         "Megumi", "Mocha", "Rize", "Sharo"]
 base_dir = Path(__file__).parent.absolute().__str__()
 data_dir = os.path.join(base_dir, "datasets_", "data")
 
 
 def dl():
-    # 0. print 设备
-    print(device)
-
     # 1. load 数据
     train_data = DatasetFromFolder(os.path.join(data_dir, "ANIME"), names)
     test_data = DatasetFromFolder(os.path.join(data_dir, "DANBOORU"), names)
@@ -54,18 +51,6 @@ def ml():
 
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
-<<<<<<< HEAD
-    tr_X_array = np.array(tr_X)
-    te_X_array = np.array(te_X)
-    # check_nor(tr_X_array)
-    start_time = time.time()
-    check_nor(te_X_array, te_y)
-    end_time = time.time()
-    print(end_time-start_time)
-    # check_dif(te_X_array, te_y)
-=======
-    tr_X = np.array(tr_X)
-    te_X = np.array(te_X)
 
     ###
     #  测试
@@ -73,13 +58,14 @@ def ml():
         train_X, test_X = pca_method(train_X, test_X)
         # step1 再次检查多重共线性
         # check_cov(train_X)
+        check_nor(test_X, test_y)
 
         #### 如下填写各个模型的测试信息
 
         ####
 
     pca(tr_X, tr_y, te_X, te_y)
->>>>>>> 31ef906aa8e1120b06466e794ac0221930e3c84e
+
     ###
 
 
