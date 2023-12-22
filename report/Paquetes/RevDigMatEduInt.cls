@@ -118,7 +118,7 @@
 
 \newcommand{\unautor}[5]{% Nombre - email - Universidad - Pa\'is - N\'umero de ORCID
 	\author{
-		\fnte[phv][12]{\href{https://orcid.org/#5}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} #1}\\
+		\fnte[phv][12]{#1}\\
 		\fntg[phv][10]{#2}\\
 		\fntg[phv][9]{#3} \\
 		\fntg[phv][10]{#4} \\
@@ -191,49 +191,49 @@
 
 \newcommand{\autores}{% Nombre - email - Universidad - Pa\'is - N\'umero de ORCID
 	\author{
-		\fnte[phv][12]{\href{https://orcid.org/\orcidautoruno}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautoruno}\\
+		\fnte[phv][12]{\href{https://orcid.org/\orcidautoruno}{} \nombreautoruno}\\
 		\fntg[phv][10]{\correoautoruno}\\
 		\fntg[phv][9]{\universidadautoruno} \\
 		\fntg[phv][10]{\paisautoruno} \\
 		\ifx\nombreautordos\undefined\else
 			\and
-			\fnte[phv][12]{\href{https://orcid.org/\orcidautordos}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautordos}\\
+			\fnte[phv][12]{\href{https://orcid.org/\orcidautordos}{} \nombreautordos}\\
 			\fntg[phv][10]{\correoautordos}\\
 			\fntg[phv][9]{\universidadautordos} \\
 			\fntg[phv][10]{\paisautordos} \\
 			\ifx\nombreautortres\undefined\else
 				\and
-				\fnte[phv][12]{\href{https://orcid.org/\orcidautortres}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautortres}\\
+				\fnte[phv][12]{\href{https://orcid.org/\orcidautortres}{} \nombreautortres}\\
 				\fntg[phv][10]{\correoautortres}\\
 				\fntg[phv][9]{\universidadautortres} \\
 				\fntg[phv][10]{\paisautortres} \\
 				\ifx\nombreautorcuatro\undefined\else
 					\and
-					\fnte[phv][12]{\href{https://orcid.org/\orcidautorcuatro}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautorcuatro}\\
+					\fnte[phv][12]{\href{https://orcid.org/\orcidautorcuatro}{} \nombreautorcuatro}\\
 					\fntg[phv][10]{\correoautorcuatro}\\
 					\fntg[phv][9]{\universidadautorcuatro} \\
 					\fntg[phv][10]{\paisautorcuatro} \\
 					\ifx\nombreautorcinco\undefined\else
 						\and
-						\fnte[phv][12]{\href{https://orcid.org/\orcidautorcinco}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautorcinco}\\
+						\fnte[phv][12]{\href{https://orcid.org/\orcidautorcinco}{} \nombreautorcinco}\\
 						\fntg[phv][10]{\correoautorcinco}\\
 						\fntg[phv][9]{\universidadautorcinco} \\
 						\fntg[phv][10]{\paisautorcinco} \\
 						\ifx\nombreautorseis\undefined\else
 							\and
-							\fnte[phv][12]{\href{https://orcid.org/\orcidautorseis}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautorseis}\\
+							\fnte[phv][12]{\href{https://orcid.org/\orcidautorseis}{} \nombreautorseis}\\
 							\fntg[phv][10]{\correoautorseis}\\
 							\fntg[phv][9]{\universidadautorseis} \\
 							\fntg[phv][10]{\paisautorseis} \\
 							\ifx\nombreautorsiete\undefined\else
 								\and
-								\fnte[phv][12]{\href{https://orcid.org/\orcidautorsiete}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautorsiete}\\
+								\fnte[phv][12]{\href{https://orcid.org/\orcidautorsiete}{} \nombreautorsiete}\\
 								\fntg[phv][10]{\correoautorsiete}\\
 								\fntg[phv][9]{\universidadautorsiete} \\
 								\fntg[phv][10]{\paisautorsiete} \\
 								\ifx\nombreautorocho\undefined\else
 									\and
-									\fnte[phv][12]{\href{https://orcid.org/\orcidautorocho}{\includegraphics[scale=0.65]{./images/ORCID-iD_icon-16x16.png}} \nombreautorocho}\\
+									\fnte[phv][12]{\href{https://orcid.org/\orcidautorocho}{} \nombreautorocho}\\
 									\fntg[phv][10]{\correoautorocho}\\
 									\fntg[phv][9]{\universidadautorocho} \\
 									\fntg[phv][10]{\paisautorocho} \\
@@ -267,7 +267,7 @@
 
 \makeatletter
 \renewenvironment{thebibliography}[1]
-{\section{\bibname}% <-- this line was changed from \chapter* to \section*
+{\section{参考}% <-- this line was changed from \chapter* to \section*
 	\@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}%
 	\list{\@biblabel{\@arabic\c@enumiv}}%
 	{\settowidth\labelwidth{\@biblabel{#1}}%
@@ -277,7 +277,7 @@
 		\usecounter{enumiv}%
 		\let\p@enumiv\@empty
 		\renewcommand\theenumiv{\@arabic\c@enumiv}}%
-	\sloppy
+	\sloppy	
 	\clubpenalty4000
 	\@clubpenalty \clubpenalty
 	\widowpenalty4000%
