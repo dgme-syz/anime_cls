@@ -12,23 +12,21 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 import seaborn as sns
 from pylab import *
-<<<<<<< HEAD
-
-
-mpl.rcParams['font.sans-serif'] = ['SimHei']
-=======
-import time, matplotlib
+import time, matplotlib, torch, sys
 import pandas as pd
 from scipy.stats import f_oneway
 from scipy.stats import chi2
+from pathlib import Path
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import interp1d
->>>>>>> 706aefbe8b659b26ec2be7304016f52801107e69
-
+import torch.nn.functional as F
+base_dir = Path(__file__).parent.absolute().__str__()
+sys.path.append(base_dir)
+from dl_models import Net, train, ResNet18, KNet
 # 显示中文字符和负数
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 选择一个包含中文字符的字体
 plt.rcParams['axes.unicode_minus'] = False  # 显示负号
-matplotlib.rcParams['font.family'] = 'Arial'
 
 # 1. 检验高维数据是否满足正态分布
 def check_nor(data_, labels):
@@ -180,24 +178,6 @@ def pca_method(tr_X, te_X, n_components = 100):
     return tr_X_pca, te_X_pca, variance_ratio_sum
 
 
-'''
-def ker_pca_method(tr_X, te_X):
-    """
-    输入: 训练集的特征 tr_X, 测试集的特征 te_X
-    输出: 使用 tanh核pca 对于 tr_X 做降维(自行选择一个降维的合适维度) 
-          然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
-    """
-    # 使用tanh核PCA对训练集进行降维
-    n_components = 100  # 自定义降维的合适维度
-    kpca = KernelPCA(n_components=n_components, kernel='sigmoid')
-    tr_X_kpca = kpca.fit_transform(tr_X)
-
-    # 使用训练好的PCA对测试集进行降维
-    te_X_kpca = kpca.transform(te_X)
-
-    return tr_X_kpca, te_X_kpca
-'''
-
 
 def flda_method(tr_X, tr_y, te_X, decompose=8):
     """
@@ -206,11 +186,7 @@ def flda_method(tr_X, tr_y, te_X, decompose=8):
           然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
     """
     # 使用FLDA对训练集进行降维
-<<<<<<< HEAD
-    flda = LinearDiscriminantAnalysis(n_components=8)  # 自行选择合适的降维维度
-=======
     flda = LinearDiscriminantAnalysis(n_components=decompose)  # 自行选择合适的降维维度
->>>>>>> 706aefbe8b659b26ec2be7304016f52801107e69
     tr_X_flda = flda.fit_transform(tr_X, tr_y)
 
     # 使用训练好的FLDA模型对测试集进行降维
@@ -680,6 +656,426 @@ def qda_method(tr_X, tr_y, te_X, te_y):
     print(f"qda图像已保存至: {save_path}")
 
     return acc, run_time, micro_f1, macro_f1, min_recall, avg_class_acc, harmonic_mean
+
+
+def pca(tr_X, tr_y, te_X, te_y):
+        n_list = [10,50,100,200,500]
+        n_list_str = ['10', '50', '100', '200', '500']
+        variance_ratio = []
+        # 定义列表名
+        list_names = ['dtree_acc', 'dtree_time', 'dtree_mif', 'dtree_maf', 'dtree_mrc', 'dtree_aca', 'dtree_hm',
+                      'mlr_acc', 'mlr_time', 'mlr_mif', 'mlr_maf', 'mlr_mrc', 'mlr_aca', 'mlr_hm',
+                      'knn_acc', 'knn_time', 'knn_mif', 'knn_maf', 'knn_mrc', 'knn_aca', 'knn_hm',
+                      'svm_acc', 'svm_time', 'svm_mif', 'svm_maf', 'svm_mrc', 'svm_aca', 'svm_hm',
+                      'qda_acc', 'qda_time', 'qda_mif', 'qda_maf', 'qda_mrc', 'qda_aca', 'qda_hm']
+        # 创建空列表的字典
+        lists = {name: [] for name in list_names}
+        methods = [decision_tree_method, multivariables_linear_regression, knn_method, svm_method, qda_method]
+        for i in n_list:
+            it = iter(list_names)
+            train_X, test_X, vr = pca_method(tr_X, te_X, i)
+            variance_ratio.append(vr)
+            for j in range(5):
+                ans = methods[j](train_X, tr_y, test_X, te_y)
+                for k in range(7):
+                    lists[next(it)].append(ans[k])           
+        print("\n")
+        it = iter(list_names)
+        mod = ["决策树", "多因变量线性回归", "KNN", "SVM", "QDA"]
+        nam = ["准确率", "时间", "micro_F1", "macro_F1", "最小召回率", "类准确率平均值", "类准确率调和平均值"]
+        for k in range(5):
+            for i in range(7):
+                output_format = f"在10, 50, 100, 200, 500维度下，{mod[k]}的{nam[i]}分别为: {lists[next(it)]}"
+                print(output_format)
+                print("\n")
+
+        # 绘制PCA方差解释率随维度的变化
+        lower_curve = [x - 0.05 for x in variance_ratio]
+        upper_curve = [x + 0.05 for x in variance_ratio]
+        fig, ax = plt.subplots()
+        ax.plot(n_list_str, variance_ratio, color='#144a74')
+        ax.fill_between(n_list_str, lower_curve, upper_curve, alpha=0.35, color='#93b5cf')
+        ax.set(xlabel='降维维度', ylabel='方差解释率',
+               title='PCA方差解释率随维度的变化')
+        lower_bound = 0.5
+        upper_bound = 1.0
+        ax.set_ylim(lower_bound, upper_bound)
+        ax.set_yticks([lower_bound + i*(upper_bound-lower_bound)/5 for i in range(6)])
+        ax.grid(True, color = '#74759b', linestyle=':', alpha=0.25)
+        for i, j in zip(n_list_str, variance_ratio):
+            ax.text(i, j, str(round(j, 2)), ha='center', va='bottom', fontsize=10)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        fig.savefig("./result_fig/variance_ratio.png", dpi=600)
+        plt.close()
+
+        # 绘制各个分类器下不同指标的变化图
+
+        line_colors = ['#5890da', '#5890da', '#87cfa4', '#fee8a6', '#469eb4', '#cbe99d']
+
+        # 决策树分类器
+        plot_dtree = ['dtree_acc', 'dtree_mif', 'dtree_maf', 'dtree_mrc', 'dtree_aca', 'dtree_hm']
+        fig, ax = plt.subplots()
+        for i, var_name in enumerate(plot_dtree):
+            # 获取对应变量的值
+            values = lists[var_name]
+
+            # 计算误差带的上下界
+            lower_bound = np.array(values) * 0.95
+            upper_bound = np.array(values) * 1.05
+
+            # 绘制误差带
+            ax.fill_between(n_list_str, lower_bound, upper_bound, alpha=0.2, color=line_colors[i])
+
+            # 绘制折线图，并设置线条颜色为line_colors中的对应颜色
+            ax.plot(n_list_str, values, label=var_name, linestyle='-', color=line_colors[i])
+
+            for x, y in zip(n_list_str, values):
+                ax.annotate('{:.2f}'.format(y), (x, y), xytext=(0, 0), textcoords='offset points', ha='center',
+                            va='bottom', fontsize=6)
+
+        # 获取图例的handles和labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # 创建新的handles和labels，只包含要显示的变量名
+        new_handles = []
+        new_labels = []
+
+        for handle, var_name in zip(handles, plot_dtree):
+            if var_name in plot_dtree:
+                new_handles.append(handle)
+                if var_name == 'dtree_acc':
+                    new_labels.append('Acc')
+                elif var_name == 'dtree_mif':
+                    new_labels.append('Micro_F1')
+                elif var_name == 'dtree_maf':
+                    new_labels.append('Macro_F1')
+                elif var_name == 'dtree_mrc':
+                    new_labels.append('LR')
+                elif var_name == 'dtree_aca':
+                    new_labels.append('GM_Acc')
+                elif var_name == 'dtree_hm':
+                    new_labels.append('HM_Acc')
+
+        legend = ax.legend(new_handles, new_labels, bbox_to_anchor=(1.0, 1.0), loc='upper right')
+
+        ax.set_ylim(0, 1.1)
+        ax.set_xlabel('N_Components')
+        ax.set_ylabel('Value')
+        ax.set_title(r'$\mathbf{Decision\ Tree}$')
+        # 启用网格线，设置虚线样式，不透明度为0.25
+        ax.grid(True, linestyle=':', alpha=0.50)
+        # 去掉四个边框
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # 显示图形
+        fig.savefig("./result_fig/dtree_pca.png", dpi=600)
+        plt.close()
+
+        # 多因变量线性回归分类器
+        plot_mlr = ['mlr_acc', 'mlr_mif', 'mlr_maf', 'mlr_mrc', 'mlr_aca', 'mlr_hm']
+        fig, ax = plt.subplots()
+        for i, var_name in enumerate(plot_mlr):
+            # 获取对应变量的值
+            values = lists[var_name]
+
+            # 计算误差带的上下界
+            lower_bound = np.array(values) * 0.95
+            upper_bound = np.array(values) * 1.05
+
+            # 绘制误差带
+            ax.fill_between(n_list_str, lower_bound, upper_bound, alpha=0.2, color=line_colors[i])
+
+            # 绘制折线图，并设置线条颜色为line_colors中的对应颜色
+            ax.plot(n_list_str, values, label=var_name, linestyle='-', color=line_colors[i])
+
+            for x, y in zip(n_list_str, values):
+                ax.annotate('{:.2f}'.format(y), (x, y), xytext=(0, 0), textcoords='offset points', ha='center',
+                            va='bottom', fontsize=6)
+
+        # 获取图例的handles和labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # 创建新的handles和labels，只包含要显示的变量名
+        new_handles = []
+        new_labels = []
+
+        for handle, var_name in zip(handles, plot_mlr):
+            if var_name in plot_mlr:
+                new_handles.append(handle)
+                if var_name == 'mlr_acc':
+                    new_labels.append('Acc')
+                elif var_name == 'mlr_mif':
+                    new_labels.append('Micro_F1')
+                elif var_name == 'mlr_maf':
+                    new_labels.append('Macro_F1')
+                elif var_name == 'mlr_mrc':
+                    new_labels.append('LR')
+                elif var_name == 'mlr_aca':
+                    new_labels.append('GM_Acc')
+                elif var_name == 'mlr_hm':
+                    new_labels.append('HM_Acc')
+
+        legend = ax.legend(new_handles, new_labels, bbox_to_anchor=(1.0, 1.0), loc='upper right')
+
+        ax.set_ylim(0, 1.4)
+        ax.set_xlabel('N_Components')
+        ax.set_ylabel('Value')
+        ax.set_title(r'$\mathbf{Multivariables\ Linear\ Regression}$')
+        # 启用网格线，设置虚线样式，不透明度为0.25
+        ax.grid(True, linestyle=':', alpha=0.50)
+        # 去掉四个边框
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # 显示图形
+        fig.savefig("./result_fig/mlr_pca.png", dpi=600)
+        plt.close()
+
+        # KNN分类器
+        plot_knn = ['knn_acc', 'knn_mif', 'knn_maf', 'knn_mrc', 'knn_aca', 'knn_hm']
+        fig, ax = plt.subplots()
+        for i, var_name in enumerate(plot_knn):
+            # 获取对应变量的值
+            values = lists[var_name]
+
+            # 计算误差带的上下界
+            lower_bound = np.array(values) * 0.95
+            upper_bound = np.array(values) * 1.05
+
+            # 绘制误差带
+            ax.fill_between(n_list_str, lower_bound, upper_bound, alpha=0.2, color=line_colors[i])
+
+            # 绘制折线图，并设置线条颜色为line_colors中的对应颜色
+            ax.plot(n_list_str, values, label=var_name, linestyle='-', color=line_colors[i])
+
+            for x, y in zip(n_list_str, values):
+                ax.annotate('{:.2f}'.format(y), (x, y), xytext=(0, 0), textcoords='offset points', ha='center',
+                            va='bottom', fontsize=6)
+
+        # 获取图例的handles和labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # 创建新的handles和labels，只包含要显示的变量名
+        new_handles = []
+        new_labels = []
+
+        for handle, var_name in zip(handles, plot_knn):
+            if var_name in plot_knn:
+                new_handles.append(handle)
+                if var_name == 'knn_acc':
+                    new_labels.append('Acc')
+                elif var_name == 'knn_mif':
+                    new_labels.append('Micro_F1')
+                elif var_name == 'knn_maf':
+                    new_labels.append('Macro_F1')
+                elif var_name == 'knn_mrc':
+                    new_labels.append('LR')
+                elif var_name == 'knn_aca':
+                    new_labels.append('GM_Acc')
+                elif var_name == 'knn_hm':
+                    new_labels.append('HM_Acc')
+
+        legend = ax.legend(new_handles, new_labels, bbox_to_anchor=(1.0, 1.0), loc='upper right')
+
+        ax.set_ylim(0, 1.3)
+        ax.set_xlabel('N_Components')
+        ax.set_ylabel('Value')
+        ax.set_title(r'$\mathbf{KNN}$')
+        # 启用网格线，设置虚线样式，不透明度为0.25
+        ax.grid(True, linestyle=':', alpha=0.50)
+        # 去掉四个边框
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # 显示图形
+        fig.savefig("./result_fig/knn_pca.png", dpi=600)
+        plt.close()
+
+        # SVM分类器
+        plot_svm = ['svm_acc', 'svm_mif', 'svm_maf', 'svm_mrc', 'svm_aca', 'svm_hm']
+        fig, ax = plt.subplots()
+        for i, var_name in enumerate(plot_svm):
+            # 获取对应变量的值
+            values = lists[var_name]
+
+            # 计算误差带的上下界
+            lower_bound = np.array(values) * 0.95
+            upper_bound = np.array(values) * 1.05
+
+            # 绘制误差带
+            ax.fill_between(n_list_str, lower_bound, upper_bound, alpha=0.2, color=line_colors[i])
+
+            # 绘制折线图，并设置线条颜色为line_colors中的对应颜色
+            ax.plot(n_list_str, values, label=var_name, linestyle='-', color=line_colors[i])
+
+            for x, y in zip(n_list_str, values):
+                ax.annotate('{:.2f}'.format(y), (x, y), xytext=(0, 0), textcoords='offset points', ha='center',
+                            va='bottom', fontsize=6)
+
+        # 获取图例的handles和labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # 创建新的handles和labels，只包含要显示的变量名
+        new_handles = []
+        new_labels = []
+
+        for handle, var_name in zip(handles, plot_svm):
+            if var_name in plot_svm:
+                new_handles.append(handle)
+                if var_name == 'svm_acc':
+                    new_labels.append('Acc')
+                elif var_name == 'svm_mif':
+                    new_labels.append('Micro_F1')
+                elif var_name == 'svm_maf':
+                    new_labels.append('Macro_F1')
+                elif var_name == 'svm_mrc':
+                    new_labels.append('LR')
+                elif var_name == 'svm_aca':
+                    new_labels.append('GM_Acc')
+                elif var_name == 'svm_hm':
+                    new_labels.append('HM_Acc')
+
+        legend = ax.legend(new_handles, new_labels, bbox_to_anchor=(1.0, 1.0), loc='upper right')
+
+        ax.set_ylim(0, 1.5)
+        ax.set_xlabel('N_Components')
+        ax.set_ylabel('Value')
+        ax.set_title(r'$\mathbf{SVM}$')
+        # 启用网格线，设置虚线样式，不透明度为0.25
+        ax.grid(True, linestyle=':', alpha=0.50)
+        # 去掉四个边框
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # 显示图形
+        fig.savefig("./result_fig/svm_pca.png", dpi=600)
+        plt.close()
+
+        plot_qda = ['qda_acc', 'qda_mif', 'qda_maf', 'qda_mrc', 'qda_aca', 'qda_hm']
+        fig, ax = plt.subplots()
+        for i, var_name in enumerate(plot_qda):
+            # 获取对应变量的值
+            values = lists[var_name]
+
+            # 计算误差带的上下界
+            lower_bound = np.array(values) * 0.95
+            upper_bound = np.array(values) * 1.05
+
+            # 绘制误差带
+            ax.fill_between(n_list_str, lower_bound, upper_bound, alpha=0.2, color=line_colors[i])
+
+            # 绘制折线图，并设置线条颜色为line_colors中的对应颜色
+            ax.plot(n_list_str, values, label=var_name, linestyle='-', color=line_colors[i])
+
+            for x, y in zip(n_list_str, values):
+                ax.annotate('{:.2f}'.format(y), (x, y), xytext=(0, 0), textcoords='offset points', ha='center',
+                            va='bottom', fontsize=6)
+
+        # 获取图例的handles和labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # 创建新的handles和labels，只包含要显示的变量名和对应的标签
+        new_handles = []
+        new_labels = []
+        for handle, var_name in zip(handles, plot_qda):
+            if var_name in plot_qda:
+                new_handles.append(handle)
+                if var_name == 'qda_acc':
+                    new_labels.append('Acc')
+                elif var_name == 'qda_mif':
+                    new_labels.append('Micro_F1')
+                elif var_name == 'qda_maf':
+                    new_labels.append('Macro_F1')
+                elif var_name == 'qda_mrc':
+                    new_labels.append('LR')
+                elif var_name == 'qda_aca':
+                    new_labels.append('GM_Acc')
+                elif var_name == 'qda_hm':
+                    new_labels.append('HM_Acc')
+
+        # 创建图例，并设置标签和位置
+        legend = ax.legend(new_handles, new_labels, bbox_to_anchor=(1.0, 1.0), loc='upper right')
+        ax.set_ylim(0, 1.4)
+        ax.set_xlabel('N_Components')
+        ax.set_ylabel('Value')
+        title_text = ax.set_title(r'$\mathbf{QDA}$')
+        # 设置每个字母的字体大小
+        # title_text.set_fontsize(10)
+        # 启用网格线，设置虚线样式，不透明度为0.25
+        ax.grid(True, linestyle=':', alpha=0.50)
+        # 去掉四个边框
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # 显示图形
+        fig.savefig("./result_fig/qda_pca.png", dpi=600)
+        plt.close()
+
+def flda(tr_X, tr_y, te_X, te_y):
+
+        train_X, test_X = flda_method(tr_X, tr_y, te_X)
+
+        # 定义变量名列表
+        variable_names = ['dtree_acc', 'dtree_time', 'dtree_mif', 'dtree_maf', 'dtree_mrc', 'dtree_aca', 'dtree_hm',
+                          'mlr_acc', 'mlr_time', 'mlr_mif', 'mlr_maf', 'mlr_mrc', 'mlr_aca', 'mlr_hm',
+                          'knn_acc', 'knn_time', 'knn_mif', 'knn_maf', 'knn_mrc', 'knn_aca', 'knn_hm',
+                          'svm_acc', 'svm_time', 'svm_mif', 'svm_maf', 'svm_mrc', 'svm_aca', 'svm_hm',
+                          'qda_acc', 'qda_time', 'qda_mif', 'qda_maf', 'qda_mrc', 'qda_aca', 'qda_hm']
+
+        print("\n")
+        it = iter(variable_names)
+        mod = ["决策树", "多因变量线性回归", "KNN", "SVM", "QDA"]
+        nam = ["准确率", "时间", "micro_F1", "macro_F1", "最小召回率", "类准确率平均值", "类准确率调和平均值"]
+        methods = [decision_tree_method, multivariables_linear_regression, knn_method, svm_method, qda_method]
+        for i in range(5):
+            ans = methods[i](train_X, tr_y, test_X, te_y)
+            for j in range(len(ans)):
+                output = f"在flda降维至8维下，{mod[i]}的{next(it)}为:{ans[j]}"
+                print(output)
+            print('\n')
+
+def dl_decompose1(tr_X, tr_y, te_X, te_y):
+        net = Net()
+        net.load_state_dict(torch.load(os.path.join(base_dir, "Trained", "base.pt"), \
+                                       map_location=device))
+
+        def convert(x):
+            w, h = x.shape
+            new_x = []
+            for i in range(w):
+                new_x.append(x[i].reshape((3, 32, 32)))
+            new_x = torch.tensor(np.array(new_x), dtype=torch.float32)
+            print(new_x.shape)
+            return F.relu(net.dense1(net.f(new_x))).detach().numpy()
+
+        train_X, test_X = convert(tr_X), convert(te_X)
+
+        # 定义变量名列表
+        variable_names = ['dtree_acc', 'dtree_time', 'dtree_mif', 'dtree_maf', 'dtree_mrc', 'dtree_aca', 'dtree_hm',
+                          'mlr_acc', 'mlr_time', 'mlr_mif', 'mlr_maf', 'mlr_mrc', 'mlr_aca', 'mlr_hm',
+                          'knn_acc', 'knn_time', 'knn_mif', 'knn_maf', 'knn_mrc', 'knn_aca', 'knn_hm',
+                          'svm_acc', 'svm_time', 'svm_mif', 'svm_maf', 'svm_mrc', 'svm_aca', 'svm_hm',
+                          'qda_acc', 'qda_time', 'qda_mif', 'qda_maf', 'qda_mrc', 'qda_aca', 'qda_hm']
+        print("\n")
+        it = iter(variable_names)
+        mod = ["决策树", "多因变量线性回归", "KNN", "SVM", "QDA"]
+        nam = ["准确率", "时间", "micro_F1", "macro_F1", "最小召回率", "类准确率平均值", "类准确率调和平均值"]
+        methods = [decision_tree_method, multivariables_linear_regression, knn_method, svm_method, qda_method]
+        for i in range(5):
+            ans = methods[i](train_X, tr_y, test_X, te_y)
+            for j in range(len(ans)):
+                output = f"在神经网络降维至100维下，{mod[i]}的{next(it)}为:{ans[j]}"
+                print(output)
+            print('\n')
 
 def TwoScatter(train_data, test_data, name='picture'):
     """
