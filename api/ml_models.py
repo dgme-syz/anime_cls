@@ -196,14 +196,14 @@ def ker_pca_method(tr_X, te_X):
     return tr_X_kpca, te_X_kpca
 
 
-def flda_method(tr_X, tr_y, te_X):
+def flda_method(tr_X, tr_y, te_X, decompose=8):
     """
     输入: 训练集的特征 tr_X, 测试集的特征 te_X
-    输出: 使用 FLDA 对于 tr_X 以及 tr_y 做降维(自行选择一个降维的合适维度)
+    输出: 使用 FLDA 对于 tr_X 以及 tr_y 做降维(自行选择一个降维的合适维度)  
           然后使用这个训练好的 pca 对于 te_X 做降维, 输出二者降维后的结果
     """
     # 使用FLDA对训练集进行降维
-    flda = LinearDiscriminantAnalysis(n_components=1)  # 自行选择合适的降维维度
+    flda = LinearDiscriminantAnalysis(n_components=decompose)  # 自行选择合适的降维维度
     tr_X_flda = flda.fit_transform(tr_X, tr_y)
 
     # 使用训练好的FLDA模型对测试集进行降维
@@ -334,11 +334,12 @@ def collect_data(train_data, test_data):
         G[test_data[i]].append(train_data[i])
     return G
 
-def TwoScatter(train_data, test_data):
+def TwoScatter(train_data, test_data, name='picture'):
     """
     用密度曲线可视化二维数据
     """
-    color = "flare"
+    n = len(np.unique(test_data))
+    color_map = sns.color_palette("Spectral", n_colors=n)
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_gridspec(top=0.75, right=0.75).subplots()
     ax_histx = ax.inset_axes([0, 1.05, 1, 0.25], sharex=ax)
@@ -349,10 +350,9 @@ def TwoScatter(train_data, test_data):
     ax_histy.tick_params(axis="y", labelleft=False)
     
     # 散点图与密度曲线
-    n = len(np.unique(test_data))
     x, y = train_data[:, 0], train_data[:, 1]
     # 绘制散点图，颜色根据 test_data 指定
-    sns.scatterplot(x=x, y=y, hue=test_data, ax=ax, palette=color)
+    sns.scatterplot(x=x, y=y, hue=test_data, ax=ax, palette=color_map)
     # 收集数据
     cls = collect_data(train_data, test_data)
 
@@ -360,12 +360,12 @@ def TwoScatter(train_data, test_data):
         # x轴方向的密度曲线
         xx = [a for a, b in cls[i]]
         sns.kdeplot(pd.DataFrame({'x': xx}), ax=ax_histx, fill=True, x='x', \
-                    color=sns.color_palette(color, n)[i])
+                    color=color_map[i])
         
         # y轴方向的密度曲线
         yy = [b for a, b in cls[i]]
         sns.kdeplot(pd.DataFrame({'y': yy}), ax=ax_histy, fill=True, y='y', \
-                    color=sns.color_palette(color, n)[i])
+                    color=color_map[i])
 
     ax.grid()
     ax.set_xlabel('dim 1')
@@ -390,12 +390,13 @@ def TwoScatter(train_data, test_data):
 
     # 显示图例
     ax.legend()
+    plt.savefig(f"./img/{name}.png", dpi=600)
     plt.show()
 if __name__ == '__main__':
     np.random.seed(19680801)
 
 # some random data
-    x = 100 * np.random.randn(1000, 2)
+    x = 10000 * np.random.randn(1000, 2)
     y = np.random.randint(9, size=1000)
-    # print(y)
+    # print(np.unique(y))
     TwoScatter(x, y)

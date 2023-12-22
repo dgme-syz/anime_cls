@@ -32,7 +32,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = Net().to(device)
+    net = Net(decompose=2).to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -52,10 +52,10 @@ def ml():
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
 
-    def dl_decompose1(train_X, train_y, test_X, test_y):
-        net = Net()
-        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt"), \
-                                map_location=device))
+    def dl_decompose1(train_X, train_y, test_X, test_y, dim=100, dir_=os.path.join(base_dir, \
+                    "api", "Trained", "base.pt")):
+        net = Net(decompose=dim)
+        net.load_state_dict(torch.load(dir_, map_location=device))
         def convert(x):
             w, h = x.shape
             new_x = []
@@ -65,14 +65,15 @@ def ml():
             print(new_x.shape)
             return net.dense1(net.f(new_x)).detach().numpy()
         train_X, test_X = convert(train_X), convert(test_X)
-        assert train_X.shape[1] == 100
-    dl_decompose1(tr_X, tr_y, te_X, te_y)
+        assert train_X.shape[1] == dim
+        return train_X
+    # dl_decompose1(tr_X, tr_y, te_X, te_y)
 
     #  测试
-    scaler = StandardScaler()
+    # scaler = StandardScaler()
 
-    tr_X = scaler.fit_transform(tr_X)
-    te_X = scaler.transform(te_X)
+    # tr_X = scaler.fit_transform(tr_X)
+    # te_X = scaler.transform(te_X)
 
     def pca(train_X, train_y, test_X, test_y):
         train_X, test_X = pca_method(train_X, test_X)
@@ -86,6 +87,18 @@ def ml():
     def flda(train_X, train_y, test_X, test_y):
         train_X, test_X = flda_method(train_X, test_X)
     # flda(tr_X, tr_y, te_X, te_y)
+
+    def decompose_visulaize(train_X, train_y):
+        nn_X = dl_decompose1(train_X, train_y, train_X, train_y, 2, os.path.join(base_dir, \
+                    "api", "Trained", "decompose=2.pt"))
+        scaler = StandardScaler()
+        train_X = scaler.fit_transform(train_X)
+        pca_X, _ = pca_method(train_X, np.zeros((1, train_X.shape[1])), 2)
+        flda_X, _ = flda_method(train_X, train_y, np.zeros((1, train_X.shape[1])), 2)
+        TwoScatter(pca_X, train_y, "pca1")
+        TwoScatter(flda_X, train_y, "flda1")
+        TwoScatter(nn_X, train_y, "nn1")
+    decompose_visulaize(tr_X, tr_y)
     ###
 
 

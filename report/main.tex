@@ -165,7 +165,7 @@ $$
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=0.33]{./images/pic3}
+	\includegraphics[scale=0.38]{./images/pic3}
 	\caption{频率直方图}
 \end{figure}
 
@@ -261,11 +261,10 @@ $$
 其中$q_t$ 对应于训练集的先验即训练集中各个类别出现的频率，$S_t$ 指的是第 $t$ 个总体的样本协方差阵，事实上当各个总体服从正态分布时，广义平方距离判别与贝叶斯判别一致，但是广义平方距离判别法适用范围更广。
  
 \subsubsection{其它分类器}
-我们还考虑了 SVM 和决策树等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
+我们还考虑了KNN， SVM 和决策树等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
 
 \subsection{指标介绍}
 由于是多分类问题，并且数据集具有长尾性质，这就要求需要有多样的分类器评价指标来支撑实验的有效性，实验采用了以下指标
-\begin{nota}
 \begin{itemize}
 	\item Accuracy: 最常见的分类器性能评判指标
 	\item Micro-F1: 对于数据集中每个类单独计算 $\mathrm{TP}_i,\mathrm{FP}_i,\mathrm{FN}_i$，同时定义 $\mathrm{pre}_{mi}$以及$\mathrm{rec}_{mi}$，从而得到 Micro-F1:
@@ -283,7 +282,6 @@ $$
 	\item Harmonic-acc:所有类别accuracy的调和平均值，由于调和平均对于较小的值有很大的惩罚，因此该项指标可以适于检测长尾学习里分类器的性能
 	\item Lowest Recall: 所有类别召回率的最小值
 \end{itemize}
-\end{nota}
 \subsection{PCA降维}
 最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$
 
@@ -324,6 +322,38 @@ $$
 		\label{tabla:nombre}
 	\end{minipage}
 \end{table}
+
+\begin{figure*}
+	\centering
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/pca1.png}
+		\caption{PCA}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/flda1.png}
+		\caption{FLDA}
+	\end{subfigure}
+	\begin{subfigure}{0.315\textwidth}
+		\includegraphics[width=\linewidth]{./images/nn1.png}
+		\caption{NN}
+	\end{subfigure}
+	\caption{降维效果展示，其中 NN 的第一层降维至2维}
+\end{figure*}
+\subsection{降维结果分析}
+
+\subsubsection{初步分析}
+
+首先为了很好地直观展示三者降维的效果，我们将原始数据降至2维，绘制它们的散点图及KDE曲线(参考 Figure5)。
+
+对于PCA，能够看出类7和类8峰值区域，具有明显的差异，意味着PCA能够很好的分开两个类，事实上类7(Rize)与类8(Sharo)在训练集有9052，6445条数据，Rize是紫发紫瞳女生，Sharo是金发碧眼女生，从颜色上就可以有很好地区分；类8(Sharo)与类0(Blue mountain)的头发颜色都属于偏黄的类型，大概率前 2 个主成分只提取了整体特征，一些眼睛颜色以及更细节的特征(脸形应该不算在内，二次元人物脸形都是类似的)，同样深紫色的Rize(类7)，棕色的Chiya(类2)，深蓝色的Maya(类4)，颜色差异性也不是很大，因此在PCA的KDE曲线中这3个类别的峰值区域几乎重合。可以得出结论，PCA最先感知到的是图像的整体特征。
+
+对于FLDA，尽管将3072维降至2维，FLDA以其极具针对性的目标优化，使得其无论在第一个降维特征，还是第二个降维特征下，每个类别的峰值区域有了较大的差异，或许使用一个不经 learning 的普通学习器也能发挥很好的分类性能。这也暗示了，FLDA具有很强的针对性压缩功能(但是这里无法看出泛化性能，因此还需更深入的工作)，大概率可以估计 FLDA + KNN 实际生活中应用非常广泛。
+
+神经网络降维有点大失所望，也许是梯度下降只能搜到局部最优，也许是其层与层之间还有着一些联系，导致各类别 KDE 密度曲线的峰值区域大部分重合。有可能是全连接层输出维度较低，使得其难以构建准确的像素特征，我们似乎很难解释它究竟干了什么。但是，我们仍可以将其纳入接下来任务考虑的一环，毕竟我们并不需要数据降维至2维，100维即可满足大多数情况下的需求，因此接下来，我们会采用隐层100个神经元的神经网络构建分类器。
+
+\subsubsection{降维方法与分类器}
+
+
 
 
 \begin{definicion}[(Nombre de la definición)]
