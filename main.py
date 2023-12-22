@@ -66,17 +66,17 @@ def ml():
             return net.dense1(net.f(new_x)).detach().numpy()
         train_X, test_X = convert(train_X), convert(test_X)
         assert train_X.shape[1] == 100
-    dl_decompose1(tr_X, tr_y, te_X, te_y)
+    # dl_decompose1(tr_X, tr_y, te_X, te_y)
 
     #  测试
     scaler = StandardScaler()
 
     tr_X = scaler.fit_transform(tr_X)
     te_X = scaler.transform(te_X)
-
+    check_cov(tr_X)
     def pca(train_X, train_y, test_X, test_y):
         train_X, test_X = pca_method(train_X, test_X)
-        check_nor(train_X, train_y)
+        check_cov(train_X)
 
         #### 如下填写各个模型的测试信息
 

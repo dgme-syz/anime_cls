@@ -11,14 +11,15 @@ from sklearn.tree import DecisionTreeClassifier
 from scipy.special import softmax
 import seaborn as sns
 from pylab import *
-import time
+import time, matplotlib
+import pandas as pd
 from scipy.stats import f_oneway
 from scipy.stats import chi2
 
 # 显示中文字符和负数
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 选择一个包含中文字符的字体
 plt.rcParams['axes.unicode_minus'] = False  # 显示负号
-
+matplotlib.rcParams['font.family'] = 'Arial'
 
 # 1. 检验高维数据是否满足正态分布
 def check_nor(data_, labels):
@@ -93,11 +94,18 @@ def check_cov(data_):
     print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
     # 绘制直方图
     plt.figure(figsize=(8, 6))
-    plt.hist(corr_values, bins=50, alpha=0.7, color='blue', log=True)  # 调整 bins 的数量以获得更细或更粗的直方图
+    sns.histplot(corr_values, bins=20, kde=True, stat='count', \
+                 line_kws={'color': '#a7f2a7', 'lw': 3, 'ls': ':'}) 
+
+    # 添加标题和标签
     plt.title('相关系数直方图')
     plt.xlabel('相关系数值')
     plt.ylabel('频数')
-    plt.grid(True)
+
+    # 显示图例
+    plt.legend(["KDE曲线"])
+    plt.grid()
+    plt.savefig('./img/1.png', dpi=600)
     plt.show()
 
 
@@ -300,23 +308,74 @@ def svm_method(tr_X, tr_y, te_X, te_y):
     plt.ylabel('真实标签')
     plt.show()
 
+def collect_data(train_data, test_data):
+    G = [[] for i in range(len(np.unique(test_data)))]
+    for i in range(len(test_data)):
+        G[test_data[i]].append(train_data[i])
+    return G
 
-'''
+def TwoScatter(train_data, test_data):
+    """
+    用密度曲线可视化二维数据
+    """
+    color = "flare"
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_gridspec(top=0.75, right=0.75).subplots()
+    ax_histx = ax.inset_axes([0, 1.05, 1, 0.25], sharex=ax)
+    ax_histy = ax.inset_axes([1.05, 0, 0.25, 1], sharey=ax)
+    
+    # 隐藏标签
+    ax_histx.tick_params(axis="x", labelbottom=False)
+    ax_histy.tick_params(axis="y", labelleft=False)
+    
+    # 散点图与密度曲线
+    n = len(np.unique(test_data))
+    x, y = train_data[:, 0], train_data[:, 1]
+    # 绘制散点图，颜色根据 test_data 指定
+    sns.scatterplot(x=x, y=y, hue=test_data, ax=ax, palette=color)
+    # 收集数据
+    cls = collect_data(train_data, test_data)
 
-tr_X = np.array([[1, 2], [3, 4], [5, 6]])
-tr_y = np.array([0, 1, 2])
-te_X = np.array([[1, 1], [4, 5], [6, 7]])
-te_y = np.array([3, 4, 5])
+    for i in range(n):
+        # x轴方向的密度曲线
+        xx = [a for a, b in cls[i]]
+        sns.kdeplot(pd.DataFrame({'x': xx}), ax=ax_histx, fill=True, x='x', \
+                    color=sns.color_palette(color, n)[i])
+        
+        # y轴方向的密度曲线
+        yy = [b for a, b in cls[i]]
+        sns.kdeplot(pd.DataFrame({'y': yy}), ax=ax_histy, fill=True, y='y', \
+                    color=sns.color_palette(color, n)[i])
 
-svm_method(tr_X, tr_y, te_X, te_y)
-knn_method(tr_X, tr_y, te_X, te_y)
-decision_tree_method(tr_X, tr_y, te_X, te_y)
+    ax.grid()
+    ax.set_xlabel('dim 1')
+    ax.set_ylabel('dim 2')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax_histx.grid()
+    ax_histx.set_yticks([])
+    ax_histy.set_xticks([])
+    ax_histx.set_xlabel('')
+    ax_histx.set_ylabel('')
+    ax_histy.set_xlabel('')
+    ax_histy.set_ylabel('')
+    ax_histx.spines['top'].set_visible(False)
+    ax_histx.spines['right'].set_visible(False)
+    ax_histx.spines['left'].set_visible(False)
+    ax_histy.spines['top'].set_visible(False)
+    ax_histy.spines['right'].set_visible(False)
+    ax_histy.spines['bottom'].set_visible(False)
+    ax_histy.grid()
+    ax_histy.grid(alpha=0.5, linewidth=0.5)
 
-tr_X = np.array([[1, 2], [3, 4], [5, 6]])
-tr_y = np.array([[0.2, 0.8], [0.7, 0.3], [0.4, 0.6]])
-te_X = np.array([[1, 1], [4, 5], [6, 7]])
-te_y = np.array([[0.3, 0.7], [0.6, 0.4], [0.8, 0.2]])
+    # 显示图例
+    ax.legend()
+    plt.show()
+if __name__ == '__main__':
+    np.random.seed(19680801)
 
-multivariables_linear_regression(tr_X, tr_y, te_X, te_y)
-
-'''
+# some random data
+    x = 100 * np.random.randn(1000, 2)
+    y = np.random.randint(9, size=1000)
+    # print(y)
+    TwoScatter(x, y)
