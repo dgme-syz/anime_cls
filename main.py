@@ -10,6 +10,8 @@ from datasets_.data_utils import DatasetFromFolder
 from torch.utils.data import DataLoader
 from api.dl_models import Net, train, ResNet18, KNet
 from api.ml_models import *
+from scipy.stats import chi2
+import matplotlib.pyplot as plt
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 names = ["Blue Mountain", "Chino", "Chiya", "Cocoa", "Maya",
@@ -27,7 +29,7 @@ def dl():
     test_iter = DataLoader(test_data, batch_size=256, shuffle=False)
 
     # 2. load 模型
-    net = ResNet18(9).to(device)
+    net = Net().to(device)
     loss = nn.CrossEntropyLoss(reduction='none')
     optimizer = Adam(lr=0.001, params = net.parameters())
     num_epochs = 10
@@ -44,11 +46,32 @@ def ml():
     tr_X, tr_y = train_data.ml_data()
     te_X, te_y = test_data.ml_data()
 
+    # 使用你的 ml_model 进行测试
+    print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
+
+    def dl_decompose1(train_X, train_y, test_X, test_y):
+        net = Net()
+        net.load_state_dict(torch.load(os.path.join(base_dir, "api", "Trained", "base.pt"), \
+                                map_location=device))
+        def convert(x):
+            w, h = x.shape
+            new_x = []
+            for i in range(w):
+                new_x.append(x[i].reshape((3, 32, 32)))
+            new_x = torch.tensor(np.array(new_x), dtype=torch.float32)
+            print(new_x.shape)
+            return net.dense1(net.f(new_x)).detach().numpy()
+        train_X, test_X = convert(train_X), convert(test_X)
+        assert train_X.shape[1] == 100
+    dl_decompose1(tr_X, tr_y, te_X, te_y)
+
+    #  测试
     scaler = StandardScaler()
 
     tr_X = scaler.fit_transform(tr_X)
     te_X = scaler.transform(te_X)
 
+<<<<<<< HEAD
     # 使用你的 ml_model 进行测试
     print(f"训练集尺寸: {np.array(tr_X).shape} 测试集尺寸: {np.array(te_X).shape}")
 
@@ -59,16 +82,36 @@ def ml():
         # step1 再次检查多重共线性
         # check_cov(train_X)
         check_nor(test_X, test_y)
+=======
+    def pca(train_X, train_y, test_X, test_y):
+        train_X, test_X = pca_method(train_X, test_X)
+        check_nor(train_X, train_y)
+>>>>>>> 1cd81d67a24bcc076ea3ab6aa5303a46c9826f13
 
         #### 如下填写各个模型的测试信息
 
         ####
+    # pca(tr_X, tr_y, te_X, te_y)
 
+<<<<<<< HEAD
     pca(tr_X, tr_y, te_X, te_y)
 
+=======
+    def flda(train_X, train_y, test_X, test_y):
+        train_X, test_X = flda_method(train_X, test_X)
+    # flda(tr_X, tr_y, te_X, te_y)
+>>>>>>> 1cd81d67a24bcc076ea3ab6aa5303a46c9826f13
     ###
 
 
 if __name__ == '__main__':
     # dl()
     ml()
+
+
+
+
+
+
+
+

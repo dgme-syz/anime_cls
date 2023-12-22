@@ -29,12 +29,10 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.f = torch.nn.Flatten() #
         self.dense1 = torch.nn.Linear(w * w * 3, decompose)
-        self.bn1 = nn.BatchNorm1d(decompose)  # 添加批归一化层
         self.dense2 = torch.nn.Linear(decompose, 9)
-        self.bn2 = nn.BatchNorm1d(9)  # 添加批归一化层
     def forward(self, x):
         x = self.f(x) #
-        x = self.bn2(self.dense2(self.bn1(F.relu(self.dense1(x)))))
+        x = self.dense2(F.relu(self.dense1(x)))
         return x
 
 class KNet(nn.Module):
@@ -184,10 +182,9 @@ def train(net, train_iter, test_iter, loss, num_epochs, updater, device):
     for epoch in range(num_epochs):
         train_epoch(net, train_iter, loss, updater, device)
         mat = evaluate_model(net, test_iter, loss, device)
-        if (epoch + 1) % 5 == 0:
-            save_model(net, epoch + 1, mat.acc())
+        save_model(net, epoch + 1, mat.acc())
 
 if __name__ == '__main__':
-    model = Net()
+    model = ResNet18(9)
     # 打印模型结构
     print(model)

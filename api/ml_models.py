@@ -31,6 +31,7 @@ def check_nor(data_, labels):
     for i, label in enumerate(unique_labels):
         data_class = data_[labels == label]
         num_samples, num_features = data_class.shape
+<<<<<<< HEAD
         mean_vector = np.mean(data_class, axis=0)
         cov_matrix = np.cov(data_class, rowvar=False)
         mahalanobis_distances = np.array(
@@ -39,10 +40,23 @@ def check_nor(data_, labels):
 
         sorted_distances_indices = np.argsort(mahalanobis_distances)
         sorted_distances = mahalanobis_distances[sorted_distances_indices]
+=======
+        # print(data_class[0].shape)
+        mean_vector = np.mean(data_class, axis=0).reshape(-1, 1)
+        cov_matrix_inv = np.linalg.inv(np.cov(data_class, rowvar=False))
+        mahalanobis_distances = []
+        for x in data_class:
+            x = x.reshape(-1, 1)
+            val = (x - mean_vector).T @ cov_matrix_inv @ (x - mean_vector)
+            mahalanobis_distances.append(val[0][0])
+        # print('m', mahalanobis_distances)
+        sorted_distances = sorted(mahalanobis_distances)
+>>>>>>> 1cd81d67a24bcc076ea3ab6aa5303a46c9826f13
 
         p_t = (np.arange(1, num_samples + 1) - 0.5) / num_samples
         chi_square_t = chi2.ppf(p_t, df=num_features)
 
+<<<<<<< HEAD
         # 使用索引选择正确的子图进行绘制
         row_index = i // 3
         col_index = i % 3
@@ -89,7 +103,20 @@ def check_nor(data_, labels):
         for spine in axs[row_index, col_index].spines.values():
             spine.set_edgecolor('#add5a2')  # 更改边框颜色，这里以红色为例
             spine.set_alpha(0.5)
+=======
+        assert num_features == 100
+>>>>>>> 1cd81d67a24bcc076ea3ab6aa5303a46c9826f13
 
+        a, b = i // 3, i % 3
+        axs[a, b].scatter(sorted_distances, chi_square_t, label=f'Class {label}', color='blue', alpha=0.6,
+                            marker='o')
+        # 添加斜率为1的线
+        axs[a, b].plot([0, sorted_distances[-1]], [0, sorted_distances[-1]], color='red', linestyle='--', label='Line')
+        axs[a, b].set_xlabel('马氏距离平方')
+        axs[a, b].set_ylabel('卡方分布分位数')
+        axs[a, b].set_title(f'Class {label}')
+        axs[a, b].legend()
+        axs[a, b].grid(True)
     plt.tight_layout()
     fig.savefig('Q-Q.png', dpi=600)
     plt.show()
@@ -125,10 +152,15 @@ def check_cov(data_):
 
     # 统计相关系数的值
     corr_values = np.sort(flatten_corr)  # 对相关系数值进行排序
+<<<<<<< HEAD
 
     large_cor = np.sum(corr_values >= 0.7)
     print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
 
+=======
+    large_cor = np.sum(corr_values >= 0.7)
+    print(f"强相关( >= 0.7) 有 {large_cor} 对特征对")
+>>>>>>> 1cd81d67a24bcc076ea3ab6aa5303a46c9826f13
     # 绘制直方图
     plt.figure(figsize=(8, 6))
     plt.hist(corr_values, bins=50, alpha=0.7, color='blue', log=True)  # 调整 bins 的数量以获得更细或更粗的直方图

@@ -152,17 +152,6 @@ $$
 	\caption{各类别训练集与测试集的分类情况，横轴为类别对应的样本数目，且采用对数刻度}
 \end{figure}
 
-\subsubsection{类别分布}
-
-判别分析假设每个总体数据服从正态分布，此时 FLDA 效果达到最优，检验一下各个类别是否近似服从 $M$ 元态分布很有必要，同时也可以为判别法的有效性分析做个铺垫。
-
-一个简单的方式是，当原假设 $H_0:X\sim N_M(\mu,\Sigma)$ 成立时，数据总体 $X$ 具有如下性质：
-
-\begin{lema}
-$$D^2 = (X - \mu)^\top \Sigma^{-1} (X - \mu) \sim \chi^2(M)$$
-\end{lema}
-
-因此，可以考虑绘制$\chi^2$ 统计量的 Q-Q 图，设 $D_{(t)}^2$ 为排序后第 $t$ 个样本的马氏距离，以及 $\chi_t^2$ 为 $\chi^2(M)$ 对应的分位数，通过观察 $(D_{(t)}^2,\chi_t^2)(t = 1,\cdots,N)$ 散点图是否近似分布在斜率为 1 的直线上来检验其正态性
 
 
 \subsection{特征相关性}
@@ -192,16 +181,150 @@ $$
 \end{enumerate}
 \end{observacion}
 使用这样的数据来训练传统模型是不可行的，由于本身该分类问题属于不太难的学习问题，只是用少量特征来学习大概率可行，接下来考虑使用降维方法对数据进行简化。
-\subsection{PCA降维}
-最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：
+
+
+\subsection{分类器介绍}
+
+\subsubsection{多因变量线性回归}
+
+基于 softmax 回归的思想，回归问题可以通过拟合在每个类别出现的概率($9\times 1$向量)再使用 softmax 函数转化为一个分类问题，因此这里可以将标签向量 $Y$ 的所有分量 $y_i$ 处理成独热编码的形式。
+
+设有 $k$(降维后特征的个数) 个自变量，$p$($p = 9$)个因变量，降维后数据矩阵 $X^*$ 为 $N\times k$ 的矩阵，其中每一行代表一个样本的特征，这里新引入因变量矩阵 $Y^*$，其具有如下形式:
+
+$$
+Y^* = \begin{bmatrix}
+	y_{11} & y_{12}&\cdots &y_{1p}\\
+	y_{21} & y_{22} & \cdots &y_{2p}\\
+	\vdots & & &\vdots\\
+	y_{N1} & y_{N2} & \cdots &y_{Np}
+\end{bmatrix}
+$$
+
+其中 $\begin{bmatrix}
+	y_{i1}&\cdots&y_{ip}
+\end{bmatrix}^\top$是初始标签向量 $Y$ 的分量 $y_i$ 产生的独热编码。
+
+因此学习问题转化为模型:
+
+$$
+\begin{cases}
+	Y^* = (\mathbf{1}_N | X^*) \beta + E = C\beta + E\\\\
+	\epsilon_{(i)} \sim N_p(0,\Sigma), \epsilon_i \perp \epsilon_j (i \ne j)
+\end{cases}
+$$
+
+其中$E^\top = \begin{bmatrix}
+	\epsilon_{(1)} & \cdots& \epsilon_{(N)} 
+\end{bmatrix}$，$\beta:(k + 1) \times p$，$\beta$ 的最小二乘估计为:
+
+\begin{teorema}
+$$\hat{\beta} = (C^\top C)^{-1} C^\top Y$$
+\end{teorema}
+
+最终的模型就是线性回归模型输出向量中分量最大值对应的下标为预测类别。
+
+\subsection{判别分析}
+\begin{figure*}
+	\centering
+	\includegraphics[width=0.96\textwidth]{./images/pic6}
+	\caption{取前3个类别的分布结果作展示，可以看到(马氏距离,卡方分布分位数)的点对并没有落在斜率为1的过远点的直线上，因此有理由拒绝原假设，即个总体不服从正态分布。}
+\end{figure*}
+
+判别分析也可以解决新样品的归属问题，因此可以使用判别分析解决分类问题，判别分析中我们考虑广义平方距离判别法以及贝叶斯判别法，判别分析首先假设样本属于正态分布，这需要我们检验数据是否近似满足 $9$ 元正态分布。
+
+
+一个简单的方式是，当原假设 $H_0:X\sim N_M(\mu,\Sigma)$ 成立时，数据总体 $X$ 具有如下性质：
 
 \begin{lema}
-$$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$$
+	$$D^2 = (X - \mu)^\top \Sigma^{-1} (X - \mu) \sim \chi^2(M)$$
 \end{lema}
+
+其中$\mu$ 使用 $\bar{X}$ 估计，$\Sigma$ 使用 $S $估计，因此，可以考虑绘制$\chi^2$ 统计量的 Q-Q 图，设 $D_{(t)}^2$ 为排序后第 $t$ 个样本的马氏距离，以及 $\chi_t^2$ 为 $\chi^2(M)$ 对应的分位数，通过观察 $(D_{(t)}^2,\chi_t^2)(t = 1,\cdots,N)$ 散点图是否近似分布在斜率为 1 的直线上来检验其正态性
+
+然而，我们运气并不好，首先数据本身特征达到 3072 个，其次之前的相关系数矩阵已经告诉我们有 136496 个特征对具有强相关性，因此原数据的协方差阵极大概率是半正定，而并非正定，从而 $\sigma$ 无法取逆。
+
+考虑一种退而求其次的方式，我们使用主成分分析降维之后再检验其正态性，如果降维后仍然不是正态分布，完全可以拒绝原假设，此时也就意味着无法使用贝叶斯判别法(要求得到后验分布)，但是仍然可以测试一下广义平方距离判别法的性能。
+
+在正式讲述PCA模块之前，我们先在此先展示一下这些样本降维后关于卡方分布的 Q-Q图(参考 Figure-3)，很显然，这说明我们预计的 $ (X - \mu)^\top \Sigma^{-1} (X - \mu)$ 与 $\chi^2(M)$ 有着不小的差距，因此可以正式将贝叶斯判别法从我们的考虑方案去除。
+
+\subsubsection{广义平方距离判别}
+在这个具体问题下，由于总体并非正态分布，无法检验样本总体之间的均值是否具有显著性差异，但是可以作为一种基线方法给出acc的下界。
+
+具体来说，广义平方距离判别法通过计算新样品 $X$ 到9个总体$G_i(i=0,\cdots,8)$的广义平方距离：
+
+
+
+$$
+D^2(X,G_t) = d_t^2(X) + \ln |S_t| - 2\ln | q_t| 
+$$
+
+其中$q_t$ 对应于训练集的先验即训练集中各个类别出现的频率，$S_t$ 指的是第 $t$ 个总体的样本协方差阵，事实上当各个总体服从正态分布时，广义平方距离判别与贝叶斯判别一致，但是广义平方距离判别法适用范围更广。
  
-实验设置 $k=100$，得到对应的 ratio 为 85.7\%，理论上效果不错。进一步，下面考虑
+\subsubsection{其它分类器}
+我们还考虑了 SVM 和决策树等传统学习模型，目标是通过对多种分类器进行测试，检验不同降维方法在各个模型上的具体效果，以进一步丰富我们的解决方案。通过这样的综合考虑，我们可以更全面地了解不同模型在应对特定问题时的优劣势，并为我们的解决方案提供更深入、可靠的评估。这种多模型测试的方法有助于我们更全面地把握问题的复杂性，同时为最终选择最合适的模型和降维策略提供了有力的支持。
+
+\subsection{指标介绍}
+由于是多分类问题，并且数据集具有长尾性质，这就要求需要有多样的分类器评价指标来支撑实验的有效性，实验采用了以下指标
+\begin{nota}
+\begin{itemize}
+	\item Accuracy: 最常见的分类器性能评判指标
+	\item Micro-F1: 对于数据集中每个类单独计算 $\mathrm{TP}_i,\mathrm{FP}_i,\mathrm{FN}_i$，同时定义 $\mathrm{pre}_{mi}$以及$\mathrm{rec}_{mi}$，从而得到 Micro-F1:
+	\begin{align}
+		&\mathrm{pre}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FP}_i}\notag\\
+		&\mathrm{rec}_{mi} = \frac{\sum_{i = 1}^p \mathrm{TP}_i}{\sum_{i = 1}^p \mathrm{TP}_i + \sum_{i = 1}^p \mathrm{FN}_i}\notag\\
+		&\mathrm{F1}_{mi} = \frac{2\times \mathrm{pre}_{mi}\times \mathrm{rec}_{mi}}{\mathrm{pre}_{mi} + \mathrm{rec}_{mi}}\notag
+	\end{align}
+	该指标会受到数量较多的类别影响较大。
+	\item Macro-F1: 不同于 Micro-F1，定义 $\mathrm{pre}_{ma}$为各个类别精度(precision)的算术平均值，$\mathrm{rec}_{ma}$ 为各个类别召回率(recall)的算术平均值，得到 Macro-F1 为:
+	$$
+	\mathrm{F1}_{ma} = \frac{2 \times \mathrm{pre}_{ma} \times \mathrm{rec}_{ma}}{\mathrm{pre}_{ma} + \mathrm{rec}_{ma}}
+	$$
+	\item Geometric-acc:所有类别accuracy的算术平均值
+	\item Harmonic-acc:所有类别accuracy的调和平均值，由于调和平均对于较小的值有很大的惩罚，因此该项指标可以适于检测长尾学习里分类器的性能
+	\item Lowest Recall: 所有类别召回率的最小值
+\end{itemize}
+\end{nota}
+\subsection{PCA降维}
+最简单的无监督降维是 PCA 方法，PCA将原始特征降维至几个正交的主成分，避免了多重共线性的隐忧，同时极大地保留了原始特征的信息。同时得到方差解释比例：$\mathrm{ratio}=\frac{\sum_{i=1}\lambda_{k}}{\sum_{i=1}\lambda_M}$
+
+为了搜索到一个合适的主成分个数，我们取了一个离散集合 $\{10,50,100,200,500\}$，绘制了 Figure 4来展示这种变化的趋势，由 $50,100,200,500$ 自变量以 2 倍变化，因变量等差变化，可知实际上因变量实际上大致以 $\log_2$ 的趋势变化，在计算机计算速度(尤其是 SVM 运行有点慢了)与保留主成分个数的权衡后，我们选择使用 100 个主成分继续实验。
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.06]{./images/pic4}
+	\caption{PCA解释方差比}
+\end{figure}
+
 
 %-------------Uso de los entornos-------------%
+\subsection{FLDA降维}
+有监督降维引入了对于标签的考虑，其大致工作流程是计算类内散度矩阵$A$与类间散度矩阵$B$，使用 $A^{-1}B$ 的特征向量作为投影向量对原数据进行降维，其中由于矩阵 $B$ 秩最多为 C - 1 (C 为类别数)。不同于PCA简单地仅仅使用训练集的特征，FLDA还使用了训练集的标签作为先验，有助于模型更全面的考虑这个学习问题。
+
+虽然将数据维度从 3072维 降至 $\min(N,C - 1)$ 维，似乎丢失了大量信息，但是其对于目标任务有针对的降维，使得其往往呈现比 pca 更好的效果，同时原始数据已经偏离正态分布，判别分析基于正态性假设而建立，FLDA表现最佳时应是各类别近似是正态总体，通过这样看似大胆的降维也许更有助于发现一些有趣的事情。
+
+
+\subsection{神经网络降维}
+一般来说神经网络是一个encoder-decoder架构，encoder层扮演着特征提取的角色，因此在进行前两个实验中，以及之前上课有所思考，大概感觉其实这个encoder层完全可以认为是一个降维层。
+
+如果只是用一层全连接层来作特征提取，那么本质上也是一个线性降维，但是，注意，神经网络权重参数的调整还受到来自标签所导致的损失函数的影响，所以比起像 PCA ，其更像 FLDA ，而且由于其不拘泥于数据是否存在闭式解，以及激活函数带来的非线性性质，其效果应该比 FLDA 更好。
+
+为了证实我们的想法，我们用 torch 实现了两层神经网络，第一层隐藏层有100个神经元，这与PCA一致，第二层将100个神经元映射到9个神经元输出 logits，除此之外，更加详细的训练配置参数如下所示：
+
+\begin{table}[ht!!!]
+	\centering
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\begin{tabular}{*5l}    \toprule
+			Name & Info \\ \midrule
+			批次大小    & 256  \\ 
+			优化器  & Adam\\ 
+			学习率 & 0.001\\ 
+			损失函数  & 多元交叉熵 \\  \bottomrule
+		\end{tabular}
+		\label{tabla:nombre}
+	\end{minipage}
+\end{table}
+
 
 \begin{definicion}[(Nombre de la definición)]
 	Sea $f$ ...
